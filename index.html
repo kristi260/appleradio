@@ -543,7 +543,7 @@ input[type=range]::-moz-range-thumb{width:13px;height:13px;border:0;border-radiu
   background:linear-gradient(180deg,rgba(8,8,10,.45),rgba(8,8,10,.12) 45%,rgba(8,8,10,.55))}
 /* Верх: плеер (как шапка исполнителя в Apple Music), низ: прокручиваемый список станций страны */
 #now .now-top{position:relative;flex:none;width:100%;max-width:560px;display:flex;align-items:center;justify-content:center;margin-bottom:1.6vh;cursor:grab}
-.now-hero{position:relative;flex:none;display:flex;flex-direction:column;align-items:center;width:100%}
+.now-hero{position:relative;flex:none;display:flex;flex-direction:column;align-items:center;width:100%;margin-top:auto}
 .ctl-glass{
   width:42px;height:42px;border-radius:50%;display:grid;place-items:center;font-size:18px;color:var(--text);
   background:var(--glass);border:1px solid var(--brd);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
@@ -661,11 +661,42 @@ html[data-theme="light"] #resumePill{
   box-shadow:0 14px 34px rgba(0,0,0,.16), 0 3px 10px rgba(0,0,0,.1), inset 0 1px 0 rgba(255,255,255,.9);
 }
 /* ============ NOW PLAYING · СПИСОК СТАНЦИЙ СТРАНЫ (как Top Songs) ============ */
+/* Portrait: список переехал в шторку «Ещё N станций» (пилюля внизу плеера) —
+   колонка живёт только в landscape-гриде, там display:block из медиазапроса */
 .now-list{
+  display:none;
   position:relative;flex:1 1 auto;min-height:0;width:100%;max-width:600px;
   overflow-y:auto;overscroll-behavior:contain;
   margin-top:.5vh;padding:0 6px 14px;
 }
+/* ============ NOW PLAYING · пилюля «Ещё N станций» (Apple Up Next) ============
+   Коллапсированный хвост шторки: граббер + флаг страны + счётчик. Тап или
+   свайп вверх раскрывают полноценную шторку со списком станций страны. */
+#nowMore{
+  position:relative;flex:none;display:flex;align-items:center;gap:12px;
+  width:100%;max-width:600px;margin-top:auto;padding:16px 18px 13px;border-radius:18px;cursor:pointer;
+  text-align:left;color:var(--text);font-family:inherit;
+  background:var(--glass);border:1px solid var(--brd);
+  backdrop-filter:blur(20px) saturate(160%);-webkit-backdrop-filter:blur(20px) saturate(160%);
+  box-shadow:0 10px 30px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.14);
+  transition:background .2s,transform .15s;
+}
+#nowMore .nm-grab{position:absolute;top:5px;left:50%;transform:translateX(-50%);width:30px;height:4px;border-radius:2px;background:rgba(255,255,255,.26)}
+#nowMore .nm-fl{font-size:21px;line-height:1;flex:none}
+#nowMore .nm-txt{flex:1;min-width:0}
+#nowMore .nm-txt b{display:block;font-size:14px;font-weight:600;letter-spacing:-.1px}
+#nowMore .nm-txt span{display:block;font-size:11.5px;color:var(--text2);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#nowMore .nm-chev{color:var(--text3);flex:none}
+#nowMore:active{transform:scale(.985)}
+@media(hover:hover){
+#nowMore:hover{background:rgba(255,255,255,.12)}
+}
+#nowMore.none{display:none}
+/* Вежливый inline-ответ под чипами EQ: отказ без прерывания эфира */
+#eqNote{display:none;margin:9px auto 0;max-width:420px;font-size:11.5px;line-height:1.45;color:var(--text2);
+  text-align:center;padding:7px 12px;border-radius:10px;background:rgba(255,255,255,.07);border:1px solid var(--brd)}
+#eqNote.show{display:block;animation:eqNoteIn .3s ease}
+@keyframes eqNoteIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
 .now-list::before{content:"";position:sticky;top:0;display:block;height:1px;margin:0 2px 8px;
   background:linear-gradient(90deg,transparent,rgba(255,255,255,.16) 22%,rgba(255,255,255,.16) 78%,transparent)}
 /* Скролл-индикатор списка станций (тонкая полоска справа, как в iOS):
@@ -826,8 +857,9 @@ html[data-theme="light"] #resumePill{
   /* Шеврон — абсолютом в углу: одна строка грида, список начинается у самого верха */
   #now .now-top{position:absolute;top:max(12px,env(safe-area-inset-top));left:max(4vw,env(safe-area-inset-left));z-index:6;margin:0;width:auto;max-width:none;pointer-events:none}
   #now .now-top .ctl-glass{pointer-events:auto}
-  .now-hero{grid-area:hero;justify-self:center}
-  .now-list{grid-area:list;align-self:stretch;height:auto;max-height:calc(100dvh - 30px);min-height:0;max-width:none;margin-top:0;padding-top:0}
+  .now-hero{grid-area:hero;justify-self:center;margin-top:0}
+  .now-list{grid-area:list;display:block;align-self:stretch;height:auto;max-height:calc(100dvh - 30px);min-height:0;max-width:none;margin-top:0;padding-top:0}
+  #nowMore{display:none}
   #carWrap{max-width:none}
   #nowMeta{margin-bottom:1.6vh}
   #nowMeta h2{font-size:clamp(17px,2.8vh,25px)}
@@ -952,6 +984,256 @@ html[data-theme="light"] #tabs{
   #sleepPop button{height:40px;font-size:14px}
   .row-fav{width:36px;height:36px;font-size:17px}
   #nowCtl .meta-fav{width:36px;height:36px;font-size:16px}
+}
+
+/* ================================================================
+   LIQUID GLASS (iOS 26 / Apple Music) + ПАЛИТРА ИЗ ЛОГОТИПА СТАНЦИИ
+   Цвета интерфейса считаются из логотипа играющей станции (JS: setPalette)
+   и плавно меняются благодаря @property.
+   ================================================================ */
+@property --ac{syntax:'<color>';inherits:true;initial-value:#FA233B}
+@property --ac-hi{syntax:'<color>';inherits:true;initial-value:#FF6B7F}
+@property --ac-lo{syntax:'<color>';inherits:true;initial-value:#B80F27}
+@property --ac2{syntax:'<color>';inherits:true;initial-value:#8A3BE8}
+@property --ac2-lo{syntax:'<color>';inherits:true;initial-value:#5B22A6}
+@property --ac-deep{syntax:'<color>';inherits:true;initial-value:#150A0C}
+@property --ac-pale{syntax:'<color>';inherits:true;initial-value:#FFF1F2}
+@property --on-ac{syntax:'<color>';inherits:true;initial-value:#FFFFFF}
+
+:root{
+  transition:--ac .8s ease,--ac-hi .8s ease,--ac-lo .8s ease,--ac2 .8s ease,--ac2-lo .8s ease,
+             --ac-deep .8s ease,--ac-pale .8s ease,--on-ac .5s ease;
+  --accent:var(--ac);
+  --accent-2:var(--ac-hi);
+  --accent-grad:linear-gradient(180deg,var(--ac-hi),var(--ac));
+  --bg:var(--ac-deep);
+  --glow:rgba(250,35,59,.32);
+  /* стекло: запасные значения для браузеров без color-mix */
+  --lg-fill:linear-gradient(180deg,rgba(255,255,255,.17),rgba(255,255,255,.07));
+  --lg-shadow:inset 0 1px 0 rgba(255,255,255,.34),inset 0 -1px 0 rgba(255,255,255,.07),inset 0 0 20px rgba(255,255,255,.05),0 12px 30px rgba(0,0,0,.42),0 1px 3px rgba(0,0,0,.3);
+  --lg-rim:linear-gradient(135deg,rgba(255,255,255,.6),rgba(255,255,255,.07) 30%,rgba(255,255,255,0) 58%,rgba(255,255,255,.16));
+}
+@supports (color:color-mix(in srgb,red 50%,blue)){
+  :root{
+    --c1:color-mix(in srgb,var(--ac) 55%,transparent);
+    --c2:color-mix(in srgb,var(--ac2) 42%,transparent);
+    --glow:color-mix(in srgb,var(--ac) 34%,transparent);
+    --lg-fill:linear-gradient(180deg,color-mix(in srgb,var(--ac-hi) 14%,rgba(255,255,255,.10)),color-mix(in srgb,var(--ac) 9%,rgba(255,255,255,.035)));
+    --lg-shadow:inset 0 1px 0 rgba(255,255,255,.34),inset 0 -1px 0 rgba(255,255,255,.07),inset 0 0 20px rgba(255,255,255,.05),0 12px 30px color-mix(in srgb,var(--ac) 14%,rgba(0,0,0,.42)),0 1px 3px rgba(0,0,0,.3);
+  }
+  html[data-theme="light"]{
+    --lg-fill:linear-gradient(180deg,color-mix(in srgb,var(--ac) 9%,rgba(255,255,255,.70)),color-mix(in srgb,var(--ac) 7%,rgba(255,255,255,.48)));
+    --lg-shadow:inset 0 1px 0 rgba(255,255,255,.95),inset 0 0 0 .5px rgba(255,255,255,.55),0 10px 26px color-mix(in srgb,var(--ac) 14%,rgba(0,0,0,.12)),0 1px 3px rgba(0,0,0,.1);
+  }
+}
+html[data-theme="light"]{
+  --bg:var(--ac-pale);
+  --accent-2:var(--ac-lo);
+  --lg-fill:linear-gradient(180deg,rgba(255,255,255,.72),rgba(255,255,255,.5));
+  --lg-shadow:inset 0 1px 0 rgba(255,255,255,.95),inset 0 0 0 .5px rgba(255,255,255,.55),0 10px 26px rgba(0,0,0,.13),0 1px 3px rgba(0,0,0,.1);
+  --lg-rim:linear-gradient(135deg,rgba(255,255,255,1),rgba(255,255,255,.25) 32%,rgba(255,255,255,0) 60%,rgba(255,255,255,.7));
+}
+@media (prefers-reduced-motion:reduce){:root{transition:none}}
+
+/* --- фон и свечение --- */
+#ambient .b3{background:radial-gradient(circle,rgba(0,180,255,.4),transparent 62%)}
+@supports (color:color-mix(in srgb,red 50%,blue)){
+  #ambient .b3{background:radial-gradient(circle,color-mix(in srgb,var(--ac2) 42%,transparent),transparent 62%)}
+}
+#hero{
+  color:#fff;
+  background:linear-gradient(118deg,var(--ac-lo) 0%,var(--ac2-lo) 100%);
+  box-shadow:0 18px 50px var(--glow),inset 0 1px 0 rgba(255,255,255,.22);
+}
+
+/* --- акцентные элементы читаются на любой палитре (жёлтый → тёмный текст) --- */
+/* плитки станций всегда яркие — текст белый и в светлой теме */
+.tile-name{color:#fff}
+.snav a.active,.snav a.active svg,.chip.on,.chip.cc-pill.cc-on,.eq-chips button.on,.empty .btn-glass,.tile-play{color:var(--on-ac)}
+.snav a.active{box-shadow:0 4px 14px var(--glow)}
+.chip.on,.chip.cc-pill.cc-on,.eq-chips button.on{box-shadow:0 4px 14px var(--glow)}
+.empty .btn-glass{box-shadow:0 8px 22px var(--glow)}
+.searchbox:focus-within{box-shadow:0 0 0 3.5px var(--glow)}
+.brand .brand-logo{box-shadow:0 5px 16px var(--glow),inset 0 1px 0 rgba(255,255,255,.3)}
+.badge-live{background:rgba(255,255,255,.12)}
+.badge-live .dot{background:var(--ac-hi)}
+#now{--accent-2:var(--ac-hi)}
+@supports (color:color-mix(in srgb,red 50%,blue)){
+  .badge-live{background:color-mix(in srgb,var(--ac) 22%,transparent)}
+  html[data-theme="light"] .badge-live{background:color-mix(in srgb,var(--ac) 14%,transparent)}
+  .sheet-panel{background:color-mix(in srgb,var(--ac) 12%,rgba(26,26,30,.84))}
+  html[data-theme="light"] .sheet-panel{background:color-mix(in srgb,var(--ac) 8%,rgba(252,252,254,.88))}
+  #sleepPop{background:color-mix(in srgb,var(--ac) 12%,rgba(32,32,36,.82))}
+  #toast{background:color-mix(in srgb,var(--ac) 14%,rgba(34,34,38,.82))}
+  html[data-theme="light"] #toast{background:color-mix(in srgb,var(--ac) 8%,rgba(252,252,254,.9))}
+}
+
+/* ================================================================
+   LIQUID GLASS: прозрачная заливка + блюр + зеркальная кромка
+   ================================================================ */
+#tabs,#player,#dockSearch,#crumb,#themeSeg,#resumePill{
+  background:var(--lg-fill);
+  -webkit-backdrop-filter:blur(16px) saturate(180%) brightness(1.06);
+  backdrop-filter:blur(16px) saturate(180%) brightness(1.06);
+  border:0;
+  box-shadow:var(--lg-shadow);
+}
+html[data-theme="light"] #tabs,html[data-theme="light"] #player{background:var(--lg-fill);box-shadow:var(--lg-shadow)}
+html[data-theme="light"] #resumePill{background:var(--lg-fill);box-shadow:var(--lg-shadow)}
+/* зеркальная кромка: градиентная рамка 1px, как блик на стекле iOS 26 */
+#tabs::before,#player::before,#dockSearch::before,#crumb::before,#themeSeg::after,#resumePill::before{
+  content:"";position:absolute;inset:0;border-radius:inherit;padding:1px;pointer-events:none;
+  background:var(--lg-rim);
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+  -webkit-mask-composite:xor;
+  mask:linear-gradient(#000 0 0) content-box exclude,linear-gradient(#000 0 0);
+}
+
+/* --- верхнее меню: тонкое, без плашки; стекло только у кнопок --- */
+#topbar{
+  height:calc(40px + env(safe-area-inset-top,0px));
+  padding-top:env(safe-area-inset-top,0px);
+  margin-bottom:0;
+  background:none;border-bottom:0;
+  -webkit-backdrop-filter:none;backdrop-filter:none;
+}
+html[data-theme="light"] #topbar{background:none;border-bottom:0}
+/* мягкая «scroll-edge» подложка: контент уходит под размытие */
+#topbar::before{
+  content:"";position:absolute;left:0;right:0;top:0;bottom:-12px;z-index:-1;pointer-events:none;
+  background:linear-gradient(to bottom,rgba(10,10,12,.55),transparent);
+  -webkit-backdrop-filter:blur(14px) saturate(150%);backdrop-filter:blur(14px) saturate(150%);
+  -webkit-mask-image:linear-gradient(#000 38%,transparent);mask-image:linear-gradient(#000 38%,transparent);
+}
+html[data-theme="light"] #topbar::before{background:linear-gradient(to bottom,rgba(245,245,247,.72),transparent)}
+@supports (color:color-mix(in srgb,red 50%,blue)){
+  #topbar::before{background:linear-gradient(to bottom,color-mix(in srgb,var(--bg) 80%,transparent),transparent)}
+}
+#topbar #crumb{position:relative;height:30px;gap:7px;padding:0 12px 0 4px;border-radius:15px;font-size:12.5px;opacity:1}
+#topbar #crumb:has(#crumbTxt:empty){padding:0 4px}
+#topbar .crumb .brand-logo{width:22px;height:22px;border-radius:50%}
+/* без рамки ширина внутренней области +2px: подгоняем «линзу» переключателя темы */
+#themeSeg::before{top:3px;left:29px}
+html[data-theme="light"] #themeSeg::before{transform:translateX(-26px)}
+.large-title{padding-top:14px}
+
+/* ================================================================
+   ДЕСКТОП
+   ================================================================ */
+@media (min-width:901px){
+  #player{position:relative;height:60px;border-radius:30px}
+  #dockSearch,#tabs .lens{display:none}
+  #sidebar{background:rgba(16,16,19,.55)}
+  .ctl.main{color:var(--on-ac);box-shadow:0 6px 18px var(--glow),inset 0 1px 0 rgba(255,255,255,.25)}
+}
+@supports (color:color-mix(in srgb,red 50%,blue)){
+  @media (min-width:901px){
+    #sidebar{background:color-mix(in srgb,var(--ac) 11%,rgba(14,14,18,.58))}
+    html[data-theme="light"] #sidebar{background:color-mix(in srgb,var(--ac) 7%,rgba(255,255,255,.62))}
+  }
+}
+
+/* ================================================================
+   МОБИЛЬНЫЙ ДОК: [мини-плеер] над [табы]; при скролле вниз:
+   [иконка вкладки] [мини-плеер] [поиск] в одну строку (как в iOS 26 Music)
+   ================================================================ */
+#dockSearch{display:none}
+@media (max-width:900px){
+  :root{
+    --bar-h:46px;--dock-gap:8px;
+    --dock-b:calc(6px + env(safe-area-inset-bottom,0px));
+    --dock-full:calc(var(--dock-b) + var(--bar-h)*2 + var(--dock-gap));
+  }
+  body{--dock-top:var(--dock-full)}
+  body.dock-min{--dock-top:calc(var(--dock-b) + var(--bar-h))}
+  #main{padding-bottom:calc(var(--dock-full) + 22px)}
+
+  /* мини-плеер */
+  #player{
+    left:10px;right:10px;bottom:calc(var(--dock-b) + var(--bar-h) + var(--dock-gap));
+    height:var(--bar-h);border-radius:calc(var(--bar-h)/2);padding:0 6px 0 5px;gap:9px;
+    transition:left .5s cubic-bezier(.32,.72,0,1),right .5s cubic-bezier(.32,.72,0,1),bottom .5s cubic-bezier(.32,.72,0,1);
+  }
+  body.dock-min #player{left:calc(10px + var(--bar-h) + 8px);right:calc(10px + var(--bar-h) + 8px);bottom:var(--dock-b)}
+  #playerArt{width:calc(var(--bar-h) - 12px);height:calc(var(--bar-h) - 12px);border-radius:9px}
+  .p-info{flex:1;max-width:none}
+  .p-info b{font-size:13px;line-height:1.2}
+  .p-info span{font-size:11px}
+  .p-controls{gap:0;margin-left:0}
+  #btnPrev{display:none}
+  .ctl{width:34px;height:34px}
+  .ctl.main{width:34px;height:34px;font-size:20px}
+  .p-right{display:none}
+
+  /* табы: капсула с «линзой» под активной вкладкой */
+  #tabs{
+    left:10px;right:auto;width:calc(100% - 20px);height:var(--bar-h);bottom:var(--dock-b);
+    padding:3px;border-radius:calc(var(--bar-h)/2);overflow:hidden;
+    transition:width .5s cubic-bezier(.32,.72,0,1);
+  }
+  body.dock-min #tabs{width:var(--bar-h);padding:0}
+  #tabs .lens{
+    position:absolute;z-index:0;top:3px;bottom:3px;left:3px;width:calc((100% - 6px)/5);
+    border-radius:calc(var(--bar-h)/2 - 3px);pointer-events:none;
+    background:linear-gradient(180deg,rgba(255,255,255,.24),rgba(255,255,255,.08));
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.45),inset 0 0 0 1px rgba(255,255,255,.10),0 4px 14px var(--glow);
+    transform:translateX(calc(var(--i,0)*100%));
+    transition:transform .5s cubic-bezier(.3,1.3,.45,1),opacity .25s;
+  }
+  html[data-theme="light"] #tabs .lens{background:linear-gradient(180deg,rgba(255,255,255,.95),rgba(255,255,255,.6));box-shadow:inset 0 0 0 .5px rgba(0,0,0,.05),0 3px 10px rgba(0,0,0,.1)}
+  body.dock-min #tabs .lens{opacity:0}
+  #tabs button{
+    z-index:1;gap:0;padding:1px 0 0;font-size:9.5px;font-weight:600;border-radius:calc(var(--bar-h)/2 - 3px);
+    transition:color .2s,flex .45s cubic-bezier(.32,.72,0,1),opacity .3s,transform .15s;
+  }
+  #tabs button svg{font-size:19px}
+  #tabs button span{line-height:1.15;margin-top:1px}
+  #tabs button.on{color:var(--ac-hi)}
+  html[data-theme="light"] #tabs button.on{color:var(--ac-lo)}
+  body.dock-min #tabs button:not(.keep){flex:0 0 0;width:0;min-width:0;padding:0;opacity:0;pointer-events:none}
+  body.dock-min #tabs button.keep{flex:1;color:var(--text)}
+  body.dock-min #tabs button.keep span{position:absolute;opacity:0}
+  body.dock-min #tabs button.keep svg{font-size:21px}
+
+  /* отдельный круг «Поиск» справа (виден в компактном доке) */
+  #dockSearch{
+    display:grid;place-items:center;position:fixed;z-index:60;right:10px;bottom:var(--dock-b);
+    width:var(--bar-h);height:var(--bar-h);border-radius:50%;font-size:21px;color:var(--text);
+    opacity:0;transform:scale(.6);pointer-events:none;
+    transition:opacity .3s,transform .5s cubic-bezier(.3,1.3,.45,1);
+  }
+  body.dock-min #dockSearch{opacity:1;transform:none;pointer-events:auto}
+  body.dock-min[data-view="search"] #dockSearch{color:var(--ac-hi)}
+  html[data-theme="light"] body.dock-min[data-view="search"] #dockSearch{color:var(--ac-lo)}
+  #dockSearch:active{transform:scale(.92)}
+
+  /* всплывающие слои привязаны к верху дока */
+  #toast{bottom:calc(var(--dock-top) + 12px)}
+  #toast.above-pill{bottom:calc(var(--dock-top) + 62px)}
+  #resumePill{bottom:calc(var(--dock-top) + 8px);height:42px;border-radius:21px;transition:opacity .4s,transform .4s,bottom .5s cubic-bezier(.32,.72,0,1)}
+  #app::after{
+    height:calc(var(--dock-full) + 26px);
+    background:linear-gradient(to top,rgba(0,0,0,.34),rgba(0,0,0,.1) 55%,transparent);
+    transition:height .5s cubic-bezier(.32,.72,0,1);
+  }
+  body.dock-min #app::after{height:calc(var(--dock-b) + var(--bar-h) + 30px)}
+}
+@supports (color:color-mix(in srgb,red 50%,blue)){
+  @media (max-width:900px){
+    #app::after{background:linear-gradient(to top,color-mix(in srgb,var(--bg) 82%,transparent),color-mix(in srgb,var(--bg) 30%,transparent) 55%,transparent)}
+    html[data-theme="light"] #app::after{background:linear-gradient(to top,color-mix(in srgb,var(--bg) 85%,transparent),color-mix(in srgb,var(--bg) 30%,transparent) 55%,transparent)}
+  }
+}
+@media (max-width:380px){body.dock-min #btnNext{display:none}}
+/* ландшафт на телефоне: док ниже */
+@media (orientation:landscape) and (max-height:520px){
+  :root{--bar-h:40px}
+  #tabs button svg{font-size:17px}
+  #tabs button span{font-size:8.5px}
+  #topbar{height:calc(36px + env(safe-area-inset-top,0px))}
+}
+@media (prefers-reduced-motion:reduce){
+  #player,#tabs,#dockSearch,#tabs .lens,#tabs button,#app::after,#resumePill{transition-duration:.01ms!important}
 }
 </style>
 </head>
@@ -1097,13 +1379,14 @@ html[data-theme="light"] #tabs{
   </footer>
 
   <!-- MOBILE TAB BAR (Apple Music style, floating capsule) -->
-  <nav id="tabs">
+  <nav id="tabs"><i class="lens" aria-hidden="true"></i>
     <button data-view="home" class="on"><svg class="ic s-base"><use href="#i-home"/></svg><svg class="ic s-fill"><use href="#i-homef"/></svg><span>Главная</span></button>
     <button data-view="recent"><svg class="ic s-base"><use href="#i-grid"/></svg><svg class="ic s-fill"><use href="#i-gridf"/></svg><span>Новое</span></button>
     <button data-view="all"><svg class="ic s-base"><use href="#i-radio"/></svg><svg class="ic s-fill"><use href="#i-radiof"/></svg><span>Радио</span></button>
     <button data-view="fav"><svg class="ic s-base"><use href="#i-lib"/></svg><svg class="ic s-fill"><use href="#i-libf"/></svg><span>Медиатека</span></button>
     <button data-view="search"><svg class="ic s-base"><use href="#i-search"/></svg><svg class="ic s-fill"><use href="#i-searchf"/></svg><span>Поиск</span></button>
   </nav>
+  <button id="dockSearch" data-view="search" aria-label="Поиск"><svg class="ic"><use href="#i-search"/></svg></button>
 
   <!-- Продолжить слушать: появляется при загрузке, если раньше играл эфир -->
   <button id="resumePill" title="Продолжить слушать">
@@ -1147,9 +1430,16 @@ html[data-theme="light"] #tabs{
           <button data-eq="classic">Классика</button>
           <button data-eq="bass">Бас</button>
         </div>
+        <div id="eqNote" role="status" aria-live="polite"></div>
       </div>
     </div>
     <div class="now-list" id="nowList" aria-label="Станции этой страны"></div>
+    <button id="nowMore" class="none" aria-haspopup="dialog" title="Станции этой страны">
+      <i class="nm-grab" aria-hidden="true"></i>
+      <span class="nm-fl" id="nmFlag">🎧</span>
+      <span class="nm-txt"><b id="nmCount">Станции страны</b><span id="nmSub"></span></span>
+      <svg class="ic nm-chev" style="transform:rotate(180deg)"><use href="#i-chevd"/></svg>
+    </button>
   </div>
 
   <!-- SHEET: iOS-шторка выбора страны/жанра -->
@@ -1908,6 +2198,111 @@ function rebuildAudio(){
   EQ.wired=false;
 }
 
+/* ==================== ПАЛИТРА ИЗ ЛОГОТИПА СТАНЦИИ ====================
+   Логотип → 32×32 canvas → гистограмма по оттенкам (вес = насыщенность × средняя яркость,
+   белый/чёрный/серый фон игнорируются) → два основных цвета → токены интерфейса.
+   Если сервер логотипа не отдаёт CORS (пиксели читать нельзя) или лого одноцветное/серое —
+   берётся встроенная пара цветов станции (st.c). */
+const PAL={rgb:'250,35,59',deep:'#150A0C',pale:'#FFF1F2',key:''};
+const PALCACHE=new Map();
+let lastMain='home';
+const clampN=(v,a,b)=>Math.max(a,Math.min(b,v));
+function hsl2rgb(h,s,l){h=((h%360)+360)%360;const k=n=>(n+h/30)%12,a=s*Math.min(l,1-l),f=n=>l-a*Math.max(-1,Math.min(k(n)-3,Math.min(9-k(n),1)));return [Math.round(f(0)*255),Math.round(f(8)*255),Math.round(f(4)*255)]}
+function rgb2hsl(r,g,b){r/=255;g/=255;b/=255;const mx=Math.max(r,g,b),mn=Math.min(r,g,b),d=mx-mn,l=(mx+mn)/2;let h=0,s=0;if(d){s=d/(1-Math.abs(2*l-1));if(mx===r)h=((g-b)/d)%6;else if(mx===g)h=(b-r)/d+2;else h=(r-g)/d+4;h*=60;if(h<0)h+=360}return [h,s,l]}
+const toHex=v=>'#'+v.map(x=>clampN(Math.round(x),0,255).toString(16).padStart(2,'0')).join('');
+const hexHsl=hex=>{const n=parseInt(hex.slice(1),16);return rgb2hsl(n>>16&255,n>>8&255,n&255)};
+const lumOf=v=>{const f=c=>{c/=255;return c<=.03928?c/12.92:Math.pow((c+.055)/1.055,2.4)};return .2126*f(v[0])+.7152*f(v[1])+.0722*f(v[2])};
+/* подбор светлоты: двигаем l шагом, пока яркость не удовлетворит условию (контраст с белым/тёмным фоном) */
+function fitL(h,s,l,ok,step){for(let i=0;i<24;i++){if(ok(lumOf(hsl2rgb(h,s,l))))break;const n=l+step;if(n<.1||n>.9)break;l=n}return l}
+
+function extractPalette(im){
+  const N=32,cv=document.createElement('canvas');cv.width=cv.height=N;
+  const cx=cv.getContext('2d',{willReadFrequently:true});cx.drawImage(im,0,0,N,N);
+  const d=cx.getImageData(0,0,N,N).data;
+  const bins=Array.from({length:12},()=>({w:0,r:0,g:0,b:0}));let opaque=0,chroma=0;
+  for(let i=0;i<d.length;i+=4){
+    if(d[i+3]<150)continue;opaque++;
+    const [h,s,l]=rgb2hsl(d[i],d[i+1],d[i+2]);
+    if(s<.25||l<.14||l>.9)continue;           // фон: белый, чёрный, серый
+    const w=s*(1-Math.abs(2*l-1));chroma++;
+    const b=bins[Math.floor(h/30)%12];b.w+=w;b.r+=d[i]*w;b.g+=d[i+1]*w;b.b+=d[i+2]*w;
+  }
+  if(!opaque||chroma/opaque<.07)return null;   // почти бесцветный логотип
+  /* соседние бины сливаем (красный «разрезан» по границе 0°/360°) */
+  const merged=bins.map((_,i)=>{const a=bins[(i+11)%12],b=bins[i],c=bins[(i+1)%12];
+    return {i,w:a.w*.5+b.w+c.w*.5,r:a.r+b.r+c.r,g:a.g+b.g+c.g,b:a.b+b.b+c.b,ww:a.w+b.w+c.w}});
+  const ranked=merged.filter(x=>x.ww>0).sort((x,y)=>y.w-x.w);
+  if(!ranked.length)return null;
+  const col=x=>rgb2hsl(x.r/x.ww,x.g/x.ww,x.b/x.ww);
+  const p=ranked[0],c1=col(p);let c2=null;
+  for(const x of ranked.slice(1)){
+    const dh=Math.abs(x.i-p.i),dist=Math.min(dh,12-dh);
+    if(dist>=2&&x.w>=p.w*.22){c2=col(x);break}
+  }
+  return {c1,c2};
+}
+function logoPalette(st){
+  if(PALCACHE.has(st.id))return Promise.resolve(PALCACHE.get(st.id));
+  return new Promise(res=>{
+    const fin=v=>{PALCACHE.set(st.id,v);res(v)};
+    if(!st.logo){fin(null);return}
+    const im=new Image();im.crossOrigin='anonymous';
+    im.onload=()=>{try{fin(extractPalette(im))}catch(e){fin(null)}};
+    im.onerror=()=>fin(null);
+    im.src=st.logo;
+  });
+}
+const stationFallback=st=>({c1:hexHsl(st.c[0]),c2:hexHsl(st.c[1])});
+
+/* токены интерфейса из двух цветов (h,s,l) */
+function setPalette(c1,c2,instant){
+  let [h1,s1]=c1,h2,s2;
+  const gray=s1<.2;                                      // серая станция → нейтральная палитра
+  s1=gray?.08:clampN(s1,.62,.95);
+  if(c2&&c2[1]>=.2){h2=c2[0];s2=clampN(c2[1],.55,.92)}else{h2=h1;s2=s1}
+  let dh=Math.abs(h1-h2);dh=Math.min(dh,360-dh);
+  if(dh<28&&!gray){h2=h1+34;s2=s1}                       // второй цвет слишком близок — аналоговый сосед
+  const key=[Math.round(h1),Math.round(s1*20),Math.round(h2)].join();
+  if(key===PAL.key)return;PAL.key=key;
+
+  const ac=hsl2rgb(h1,s1,.54);
+  const hi=hsl2rgb(h1,s1,fitL(h1,s1,.66,l=>l>=.30,.02));       // светлый акцент для тёмной темы
+  const lo=hsl2rgb(h1,s1,fitL(h1,s1,.42,l=>l<=.17,-.02));      // тёмный акцент: белый текст читается (AA)
+  const ac2=hsl2rgb(h2,s2,.52);
+  const lo2=hsl2rgb(h2,s2,fitL(h2,s2,.40,l=>l<=.15,-.02));
+  const deep=hsl2rgb(h1,gray?.06:clampN(s1*.55,.3,.55),.085);   // фон приложения (тёмная тема)
+  const pale=hsl2rgb(h1,gray?.08:.72,.955);                      // фон приложения (светлая тема)
+  const onac=lumOf(ac)>.30?'#17171A':'#FFFFFF';
+
+  const root=document.documentElement,st=root.style;
+  if(instant)st.transition='none';
+  st.setProperty('--ac',toHex(ac));st.setProperty('--ac-hi',toHex(hi));st.setProperty('--ac-lo',toHex(lo));
+  st.setProperty('--ac2',toHex(ac2));st.setProperty('--ac2-lo',toHex(lo2));
+  st.setProperty('--ac-deep',toHex(deep));st.setProperty('--ac-pale',toHex(pale));st.setProperty('--on-ac',onac);
+  if(instant){void root.offsetWidth;st.transition=''}
+  PAL.rgb=ac.join(',');PAL.deep=toHex(deep);PAL.pale=toHex(pale);
+  try{syncThemeColor()}catch(e){}
+}
+/* фон Now Playing — из той же палитры */
+function paintNow(q){
+  const now=$('#now');if(!now)return;
+  const [h,s]=q.c1,c2=q.c2||[h+30,s];
+  const sat=gray=>gray<.2?.08:clampN(gray,.38,.75);
+  now.style.setProperty('--nc1',toHex(hsl2rgb(h,sat(s),.2)));
+  now.style.setProperty('--nc2','hsla('+Math.round(c2[0])+','+Math.round(sat(c2[1])*100)+'%,27%,.45)');
+}
+
+/* ==================== ДОК: компактный режим при скролле ==================== */
+function syncDock(){
+  const v=state.view;if(v!=='search')lastMain=v;
+  const tabs=$('#tabs');if(!tabs)return;
+  const btns=[...tabs.querySelectorAll('button')];
+  btns.forEach(b=>b.classList.toggle('keep',b.dataset.view===lastMain));
+  tabs.style.setProperty('--i',Math.max(0,btns.findIndex(b=>b.dataset.view===v)));
+  document.body.dataset.view=v;
+  document.body.classList.remove('dock-min');
+}
+
 /* ==================== HELPERS ==================== */
 function hexA(hex,a){const n=parseInt(hex.slice(1),16);return `rgba(${n>>16&255},${n>>8&255},${n&255},${a})`}
 function initialsOf(name){
@@ -2022,7 +2417,7 @@ function renderNP(np){
 }
 /* ==================== ЭКВАЛАЙЗЕР (Web Audio API): настоящие BiquadFilter-пресеты ==================== */
 const EQ_PRESETS={off:[0,0,0],pop:[2.5,1.5,2],rock:[4,-1,3.5],jazz:[3,1.5,-1],classic:[1.5,0,2.5],bass:[6,-1.5,0]};
-const EQ={ctx:null,src:null,f:null,an:null,wired:false,cur:LS.get('eq','off'),cors:{},raf:0,noEqToast:false,wdT:0,_gotPlay:false,
+const EQ={ctx:null,src:null,f:null,an:null,wired:false,cur:LS.get('eq','off'),cors:Object.assign({},LS.get('eqCors',{})),raf:0,noEqToast:false,wdT:0,_gotPlay:false,
   /* ГЛАВНЫЙ ПРИНЦИП: эквалайзер — опциональное украшение и НИКОГДА не должен ломать эфир.
      Любой сбой граф-пути (нет CORS, уснувший контекст, отказ play()) сводится к degrade():
      EQ отключается, элемент выходит из графа, эфир перезапускается чистым. */
@@ -2032,20 +2427,26 @@ const EQ={ctx:null,src:null,f:null,an:null,wired:false,cur:LS.get('eq','off'),co
     if(corsOk===true&&this.cur!=='off'&&st&&st.type!=='hls')audio.crossOrigin='anonymous';
     else audio.removeAttribute('crossorigin');
   },
+  persistCors(){try{LS.set('eqCors',this.cors)}catch(e){}},
   async probe(st){
     /* Проба кэшируется на КОНКРЕТНЫЙ URL, а не на origin: на одном хосте разные маунты
-       нередко настроены по-разному — кэш по origin давал ложные «CORS есть» */
+       нередко настроены по-разному — кэш по origin давал ложные «CORS есть».
+       ВЕРДИКТ «CORS разрешён» = получен ЛЮБОЙ ответ (даже 416 на Range): в режиме
+       cors чужой ответ без ACAO выбросил бы TypeError, а не вернулся. Прежний ok=r.ok
+       ошибочно клеймил серверы, отвечающие на Range кодом 416/200-целиком.
+       Таймаут и офлайн вердикта НЕ дают — не кэшируем, попробуем в следующий раз. */
     if(!st||st.type==='hls')return true;
     const k=st.url;
     if(k in this.cors)return this.cors[k];
-    let ok=false;
+    let ok=false,def=false;
     try{
       const ac=new AbortController();const t=setTimeout(()=>ac.abort(),4500);
-      const r=await fetch(st.url,{method:'GET',headers:{Range:'bytes=0-1'},signal:ac.signal,mode:'cors'});
+      await fetch(st.url,{method:'GET',headers:{Range:'bytes=0-1'},signal:ac.signal,mode:'cors'});
       clearTimeout(t);try{ac.abort()}catch(e){}
-      ok=r.ok;
-    }catch(e){ok=false}
-    this.cors[k]=ok;return ok;
+      ok=true;def=true;
+    }catch(e){ok=false;def=!(e&&e.name==='AbortError')&&navigator.onLine!==false}
+    if(def){this.cors[k]=ok;this.persistCors()}
+    return ok;
   },
   wire(){
     if(this.wired)return true;
@@ -2083,7 +2484,7 @@ const EQ={ctx:null,src:null,f:null,an:null,wired:false,cur:LS.get('eq','off'),co
       for(let i=0;i<bars;i++){
         const v=Math.max(2,(d[i*step2+1]/255)*cv.height);
         const x=i*(cv.width/bars)+1.5;
-        cx.fillStyle='rgba(250,35,59,'+(0.45+v/cv.height*0.55)+')';
+        cx.fillStyle='rgba('+PAL.rgb+','+(0.45+v/cv.height*0.55)+')';
         cx.fillRect(x,cv.height-v,3,v);
       }
       this.raf=requestAnimationFrame(step);
@@ -2095,7 +2496,7 @@ const EQ={ctx:null,src:null,f:null,an:null,wired:false,cur:LS.get('eq','off'),co
   unwire(){
     /* Полный выход из графа: глушим ноды, пересоздаём аудио-элемент вне графа.
        Обратной операции у createMediaElementSource нет — только новый элемент. */
-    clearTimeout(this.wdT);this.clearCv();
+    clearTimeout(this.wdT);if(this._wdClean){try{this._wdClean()}catch(e){}}this.clearCv();
     try{if(this.src)this.src.disconnect()}catch(e){}
     try{(this.f||[]).forEach(x=>{try{x.disconnect()}catch(e){}})}catch(e){}
     try{if(this.an)this.an.disconnect()}catch(e){}
@@ -2103,21 +2504,33 @@ const EQ={ctx:null,src:null,f:null,an:null,wired:false,cur:LS.get('eq','off'),co
     if(this.wired)rebuildAudio(); // сам ставит wired=false и перевешивает события
   },
   watchdog(st){
-    /* Страховка на 7 с после EQ-(пере)подключения: эфир так и не заиграл —
-       или граф молчит — снимаем EQ и возвращаем звук чистым элементом.
+    /* Страховка после EQ-(пере)подключения. Решает не «7 с в лоб», а СЕТЕВОЙ ПРОГРЕСС:
+       на медленном LTE перезагрузка потока идёт и 10+ с (progress/loadedmetadata идут),
+       прежний watchdog ложно деградировал такой эфир. Прогресса нет 6 с подряд
+       (ждём суммарно до 20 с) — граф считаем мёртвым: снимаем EQ, чистый элемент.
        Молчащему контексту сначала даём шанс проснуться (транзиентные suspend'ы
        бывают при переключении Bluetooth/фокуса) — degrade только если не помогло. */
-    clearTimeout(this.wdT);this._gotPlay=false;
-    this.wdT=setTimeout(()=>{
-      if(curId!==st.id)return;
-      if(!this._gotPlay&&!state.playing){this.degrade(st);return}
-      if(state.playing&&this.wired&&this.ctx&&this.ctx.state!=='running'){
-        this.resume();
-        setTimeout(()=>{
-          if(curId===st.id&&state.playing&&this.wired&&this.ctx&&this.ctx.state!=='running')this.degrade(st);
-        },1800);
+    clearTimeout(this.wdT);if(this._wdClean){try{this._wdClean()}catch(e){}}
+    this._gotPlay=false;this._prog=Date.now();
+    const poke=()=>{this._prog=Date.now()};
+    audio.addEventListener('progress',poke);audio.addEventListener('loadedmetadata',poke);audio.addEventListener('canplay',poke);
+    this._wdClean=()=>{audio.removeEventListener('progress',poke);audio.removeEventListener('loadedmetadata',poke);audio.removeEventListener('canplay',poke);this._wdClean=null};
+    let arms=0;
+    const tick=()=>{
+      if(curId!==st.id){if(this._wdClean)this._wdClean();return}
+      if(this._gotPlay||state.playing){
+        if(this._wdClean)this._wdClean();
+        if(state.playing&&this.wired&&this.ctx&&this.ctx.state!=='running'){
+          this.resume();
+          setTimeout(()=>{if(curId===st.id&&state.playing&&this.wired&&this.ctx&&this.ctx.state!=='running')this.degrade(st)},1800);
+        }
+        return;
       }
-    },7000);
+      if(Date.now()-this._prog<6000&&arms<5){arms++;this.wdT=setTimeout(tick,2000);return}
+      if(this._wdClean)this._wdClean();
+      this.degrade(st);
+    };
+    this.wdT=setTimeout(tick,7000);
   },
   degrade(st){
     /* Аварийный возврат эфира: EQ off → чистый элемент → перезапуск без crossOrigin.
@@ -2149,50 +2562,78 @@ const EQ={ctx:null,src:null,f:null,an:null,wired:false,cur:LS.get('eq','off'),co
   async ensure(st){
     /* ТОЛЬКО фоновая проба CORS для кэша. Здесь больше НЕТ переподключений: прежний
        ensure после await делал второй connect() вне пользовательского жеста — на iOS
-       Safari play() отклонялся (NotAllowedError) и эфир «вечно подключался» */
+       Safari play() отклонялся (NotAllowedError) и эфир «вечно подключался».
+       Если станция обработку не допускает — честно снимаем выбранный пресет
+       (чипы возвращаются в «Выкл»), эфир не трогаем. */
     if(!st||this.wired||this.cur==='off'||st.type==='hls')return;
     const ok=await this.probe(st);
     if(curId!==st.id||this.wired)return;
-    if(!ok&&!this.noEqToast){this.noEqToast=true;toast('Для станции «'+st.name+'» эквалайзер недоступен')}
+    if(!ok){
+      if(this.cur!=='off'){this.cur='off';LS.set('eq','off');this.apply()}
+      if(!this.noEqToast){this.noEqToast=true;toast('Для станции «'+st.name+'» эквалайзер недоступен')}
+    }
   }
 };
-function setEQ(p){
+/* Вежливый inline-ответ под чипами EQ. Если ряд EQ скрыт (ландшафтный телефон) —
+   тихий фолбэк в тост */
+let eqBusy=false; /* защита от двойного клика по чипам, пока идёт проба/перезапуск */
+function eqNote(msg){
+  const note=$('#eqNote'),row=$('#nowEqRow');
+  if(!note||(row&&getComputedStyle(row).display==='none')){toast(msg);return}
+  note.textContent=msg;note.classList.add('show');
+  clearTimeout(eqNote._t);eqNote._t=setTimeout(()=>note.classList.remove('show'),4200);
+}
+async function setEQ(p){
   const st=state.cur;
   const lbl=(document.querySelector('.eq-chips [data-eq="'+p+'"]')||{textContent:p}).textContent;
   if(p==='off'){EQ.cur='off';LS.set('eq','off');EQ.apply();buzz(HAP.tap);toast('Эквалайзер выключен');return}
   if(!st){EQ.cur='off';LS.set('eq','off');EQ.apply();toast('Сначала выберите станцию');buzz(HAP.err);return}
-  /* Поток с заранее известным «нет CORS» — честный отказ БЕЗ какого-либо сбоя звука */
-  if(st.type!=='hls'&&EQ.cors[st.url]===false){
-    toast('Поток «'+st.name+'» не поддерживает эквалайзер');buzz(HAP.err);return;
-  }
-  EQ.cur=p;LS.set('eq',p);
-  /* HLS не трогаем: MSE CORS-чист, а нативному Safari crossOrigin ломает загрузку плейлиста */
-  let noReload=st.type==='hls';
-  if(!noReload){
-    noReload=audio.crossOrigin==='anonymous'&&EQ.wired&&state.playing; // граф уже активен — просто меняем пресет
-    audio.crossOrigin='anonymous';
-    if(EQ.cors[st.url]===undefined)EQ.probe(st); // фоновая проба — для будущих переключений
-  }
-  if(!EQ.wire()){
-    EQ.cur='off';LS.set('eq','off');EQ.apply();
-    audio.removeAttribute('crossorigin');
-    toast('Эквалайзер недоступен в этом браузере');buzz(HAP.err);return;
-  }
-  EQ.resume(); // в жесте — обязательно: после await iOS активацию теряет
-  /* Перезапуск эфира с crossOrigin — только когда поток реально нужно перезагрузить.
-     КЛЮЧЕВОЕ: всё синхронно, до первого await — цепочка пользовательского жеста жива,
-     поэтому на iOS Safari play() НЕ отклоняется (прежний await probe() это ломал). */
-  if(!noReload){
-    audio.pause();audio.removeAttribute('src');audio.load();
-    audio.src=st.url;
-    bufferingOn();renderPlayState();
-    audio.play().catch(()=>{});
-    NP.start(st);
-    EQ.watchdog(st); // страховка: не заиграло за 7 с — авто-возврат чистого эфира
-  }
-  EQ.apply();
-  toast('Эквалайзер: '+lbl);
-  buzz(HAP.tap);
+  if(eqBusy)return;
+  /* ВЕРДИКТ ДО ЛЮБЫХ КАСАНИЙ ПОТОКА: сначала узнаём (проба/кэш), допускает ли станция
+     обработку, и только потом ставим crossOrigin и перезапускаем эфир. Прежний
+     оптимистичный путь ломал станции без ACAO-заголовков: перезагрузка с crossOrigin
+     падала, handleFail снимал EQ — пользователь видел «отключён для восстановления
+     эфира» и терял звук на ~9 с. Теперь несовместимая станция получает вежливый
+     отказ под чипами, а эфир вообще не прерывается. */
+  eqBusy=true;
+  const prev=EQ.cur;
+  EQ.cur=p;EQ.apply(); // мгновенный отклик чипа, вердикт — следом
+  try{
+    if(st.type!=='hls'&&EQ.cors[st.url]===undefined){
+      await EQ.probe(st);
+      if(curId!==st.id){EQ.cur=prev;LS.set('eq',prev);EQ.apply();return} // станцию сменили, пока шла проба
+    }
+    if(st.type!=='hls'&&EQ.cors[st.url]===false){
+      EQ.cur='off';LS.set('eq','off');EQ.apply();
+      audio.removeAttribute('crossorigin');
+      eqNote('Для станции «'+st.name+'» эквалайзер недоступен — эфир продолжается без обработки');
+      buzz(HAP.err);return;
+    }
+    /* HLS не трогаем: MSE CORS-чист, а нативному Safari crossOrigin ломает загрузку плейлиста */
+    let noReload=st.type==='hls';
+    if(!noReload){
+      noReload=audio.crossOrigin==='anonymous'&&EQ.wired&&state.playing; // граф уже активен — просто меняем пресет
+      audio.crossOrigin='anonymous';
+    }
+    if(!EQ.wire()){
+      EQ.cur='off';LS.set('eq','off');EQ.apply();
+      audio.removeAttribute('crossorigin');
+      toast('Эквалайзер недоступен в этом браузере');buzz(HAP.err);return;
+    }
+    EQ.resume(); // в жесте — обязательно: после await iOS активацию теряет
+    /* Перезапуск эфира с crossOrigin — только когда поток реально нужно перезагрузить */
+    if(!noReload){
+      audio.pause();audio.removeAttribute('src');audio.load();
+      audio.src=st.url;
+      bufferingOn();renderPlayState();
+      audio.play().catch(()=>{});
+      NP.start(st);
+      EQ.watchdog(st); // страховка: не заиграло — авто-возврат чистого эфира
+    }
+    EQ.apply();
+    toast('Эквалайзер: '+lbl);
+    buzz(HAP.tap);
+  }finally{eqBusy=false}
 }
 document.querySelectorAll('.eq-chips button').forEach(b=>b.addEventListener('click',()=>setEQ(b.dataset.eq)));
 /* Возврат приложения из фона: проверяем, что аудиоконтекст жив (iOS усыпляет его при локе) */
@@ -2327,6 +2768,14 @@ function renderSheet(){
     /* «Все страны» = весь каталог (полки включают и записи rec) */
     $('#sheetList').innerHTML=row('all','🌍','Все страны',STATIONS.length,state.country==='all')+
       COUNTRIES.map(c=>row(c.cc,c.flag,c.name,ccCnt(c.cc),state.country===c.cc)).join('');
+  }else if(sheetKind==='now'){
+    /* «Ещё N станций»: страна в шторке — та же вёрстка строк, что в ландшафтной колонке */
+    const st=byId(curId)||state.cur;
+    if(!st){closeSheet();return}
+    const cc=byCc(st.cc);
+    $('#sheetTitle').textContent='Станции страны';
+    $('#sheetCnt').textContent=cc?(cc.flag+' '+cc.name):(st.genre||'');
+    $('#sheetList').innerHTML=STATIONS.filter(s=>s.cc===st.cc).map(nowRowHTML).join('');
   }else{
     const gs=GENRES.filter(g=>g!=='Все');
     $('#sheetTitle').textContent='Жанры';$('#sheetCnt').textContent=gs.length+' жанров';
@@ -2560,22 +3009,49 @@ function renderNowMeta(st){
 }
 /* Список станций страны под плеером: без заголовка и счётчика — компактно,
    список начинается сразу под шапкой плеера (как Top Songs в Apple Music) */
+/* Единая строка станции: ландшафтная колонка, шторка «Ещё N станций» */
+function nowRowHTML(s){
+  const on=s.id===curId,fav=state.favs.has(s.id);
+  const eqHtml='<div class="eq"><i></i><i></i><i></i><i></i></div>';
+  const playHtml='<svg class="ic"><use href="#i-play"/></svg>';
+  return `<div class="now-row ${on?'playing':''}" data-nowplay="${s.id}" style="--c1:${s.c[0]};--c2:${s.c[1]}">
+    <div class="row-art">${s.logo?`<img src="${s.logo}" alt="" loading="lazy" decoding="async" onload="this.classList.add('ok')" onerror="this.remove()">`:''}<span class="ph-l">${initialsOf(s.name)}</span></div>
+    <div class="row-txt"><b>${s.name}</b><span>${s.sub||s.genre}</span></div>
+    <button class="row-fav ${fav?'on':''}" data-nowfav="${s.id}" title="В избранное"><svg class="ic h-line"><use href="#i-heartline"/></svg></button>
+    <div class="row-side">${on?eqHtml:playHtml}</div>
+  </div>`;
+}
+function pluralSt(n){const m=n%10,h=n%100;if(m===1&&h!==11)return 'станция';if(m>=2&&m<=4&&(h<10||h>20))return 'станции';return 'станций'}
 function renderNowList(st){
   const wrap=$('#nowList');if(!wrap||!st)return;
   const list=STATIONS.filter(s=>s.cc===st.cc);
-  const eqHtml='<div class="eq"><i></i><i></i><i></i><i></i></div>';
-  const playHtml='<svg class="ic"><use href="#i-play"/></svg>';
-  wrap.innerHTML=
-    list.map(s=>{
-      const on=s.id===curId,fav=state.favs.has(s.id);
-      return `<div class="now-row ${on?'playing':''}" data-nowplay="${s.id}" style="--c1:${s.c[0]};--c2:${s.c[1]}">
-        <div class="row-art">${s.logo?`<img src="${s.logo}" alt="" loading="lazy" decoding="async" onload="this.classList.add('ok')" onerror="this.remove()">`:''}<span class="ph-l">${initialsOf(s.name)}</span></div>
-        <div class="row-txt"><b>${s.name}</b><span>${s.sub||s.genre}</span></div>
-        <button class="row-fav ${fav?'on':''}" data-nowfav="${s.id}" title="В избранное"><svg class="ic h-line"><use href="#i-heartline"/></svg></button>
-        <div class="row-side">${on?eqHtml:playHtml}</div>
-      </div>`;
-    }).join('');
+  wrap.innerHTML=list.map(nowRowHTML).join('');
+  /* Пилюля «Ещё N станций» (портрет): счётчик, флаг, подпись страны */
+  const pill=$('#nowMore');
+  if(pill){
+    const others=list.reduce((a,s)=>a+(s.id===st.id?0:1),0),cc=byCc(st.cc);
+    pill.classList.toggle('none',others===0);
+    const c1=$('#nmCount'),c2=$('#nmSub'),cf=$('#nmFlag');
+    if(c1)c1.textContent='Ещё '+others+' '+pluralSt(others);
+    if(c2)c2.textContent=cc?(cc.flag+' '+cc.name):(st.genre||'');
+    if(cf)cf.textContent=cc?cc.flag:'🎧';
+  }
+  /* Открытая шторка станций обновляется live (например, сменилась текущая) */
+  if(sheetKind==='now'&&!$('#sheet').hidden)renderSheet();
 }
+/* Пилюля: тап или свайп вверх открывают шторку (как «Up Next» в Apple Music) */
+(function(){
+  const pill=$('#nowMore');if(!pill)return;
+  pill.addEventListener('click',()=>openSheet('now'));
+  let py=null;
+  pill.addEventListener('touchstart',e=>{py={y:e.touches[0].clientY,t:Date.now()}},{passive:true});
+  pill.addEventListener('touchend',e=>{
+    if(!py)return;const dy=py.y-e.changedTouches[0].clientY;
+    if(dy>40&&Date.now()-py.t<650){buzz(HAP.open);openSheet('now')}
+    py=null;
+  },{passive:true});
+  pill.addEventListener('touchcancel',()=>{py=null},{passive:true});
+})();
 /* ===== Скролл-индикатор списка станций: тонкая полоска справа, как в iOS ===== */
 (function initScrollIndicator(){
   const list=$('#nowList'),now=$('#now');if(!list||!now)return;
@@ -2603,17 +3079,12 @@ function renderNowList(st){
 })();
 function deepen(hex,ceil){ceil=ceil||.33;const n=parseInt(hex.slice(1),16);let r=n>>16&255,g=n>>8&255,b=n&255;const mx=Math.max(r,g,b),mn=Math.min(r,g,b),l=(mx+mn)/510;if(l>ceil){const f=ceil/l;r=Math.round(r*f);g=Math.round(g*f);b=Math.round(b*f)}return '#'+((1<<24)+(r<<16)+(g<<8)+b).toString(16).slice(1)}
 function updateAmbient(st){
-  const now=$('#now');
-  now.style.setProperty('--nc1',deepen(st.c[0]));
-  now.style.setProperty('--nc2',hexA(deepen(st.c[1]),.38));
-  const mc=document.querySelector('meta[name="theme-color"]');
-  if(mc)mc.setAttribute('content',deepen(st.c[0],.26));
+  paintNow(stationFallback(st));
   nowBgCrossfade(st);
-  imgPalette(st,pal=>{
-    if(!pal)return;
-    now.style.setProperty('--nc1',deepen(pal[0]));
-    now.style.setProperty('--nc2',hexA(deepen(pal[1]),.38));
-  });
+  const go=p=>{if(curId!==st.id)return;const q=p||stationFallback(st);setPalette(q.c1,q.c2);paintNow(q)};
+  /* логотип обычно грузится быстро; если нет — сначала встроенные цвета станции, потом апгрейд из логотипа */
+  const t=setTimeout(()=>go(null),1000);
+  logoPalette(st).then(p=>{clearTimeout(t);go(p)});
 }
 /* ===== Амбиент из логотипа: кроссфейд двух размытых слоёв + палитра с логотипа ===== */
 let bgFlip=false;
@@ -2625,20 +3096,6 @@ function nowBgCrossfade(st){
   tmp.onload=()=>{inc.src=st.logo;inc.style.opacity=.42;out.style.opacity=0};
   tmp.onerror=()=>{inc.style.opacity=0;out.style.opacity=0};
   tmp.src=st.logo;
-}
-function imgPalette(st,cb){
-  if(!st.logo){cb(null);return}
-  const im=new Image();im.crossOrigin='anonymous';
-  im.onload=()=>{try{
-    const cv=document.createElement('canvas');cv.width=cv.height=16;const cx=cv.getContext('2d');
-    cx.drawImage(im,0,0,16,16);const d=cx.getImageData(0,0,16,16).data;
-    const avg=(x0,x1)=>{let r=0,g=0,b=0,n=0;for(let y=0;y<16;y++)for(let x=x0;x<x1;x++){const i=(y*16+x)*4;if(d[i+3]>140){r+=d[i];g+=d[i+1];b+=d[i+2];n++}}n=n||1;return [Math.round(r/n),Math.round(g/n),Math.round(b/n)]};
-    const L=avg(0,8),R=avg(8,16);
-    const h=v=>'#'+v.map(x=>x.toString(16).padStart(2,'0')).join('');
-    cb([h(L),h(R)]);
-  }catch(e){cb(null)}};
-  im.onerror=()=>cb(null);
-  im.src=st.logo;
 }
 /* ===== Карусель: свайп по обложкам переключает эфир; блокировка при повороте ===== */
 let carRsLock=0,carSettleT=null;
@@ -2738,6 +3195,7 @@ function setView(v){
   document.querySelectorAll('.snav a').forEach(a=>a.classList.toggle('active',a.dataset.view===v));
   document.querySelectorAll('#tabs button').forEach(b=>b.classList.toggle('on',b.dataset.view===v));
   render();$('#main').scrollTo({top:0});
+  syncDock();
 }
 
 /* ==================== VOLUME ==================== */
@@ -2912,7 +3370,7 @@ document.addEventListener('click',e=>{
   const nowFav=e.target.closest('[data-nowfav]');
   if(nowFav){e.stopPropagation();toggleFav(nowFav.dataset.nowfav);return}
   const nowRow=e.target.closest('[data-nowplay]');
-  if(nowRow){buzz(HAP.tap);playStation(byId(nowRow.dataset.nowplay));return}
+  if(nowRow){const inSheet=!!nowRow.closest('#sheet');buzz(HAP.tap);playStation(byId(nowRow.dataset.nowplay));if(inSheet)closeSheet();return} /* inSheet ДО playStation: connect перерисовывает шторку и строка отсоединяется от DOM */
   const playBtn=e.target.closest('.tile-play');
   if(playBtn){e.stopPropagation();buzz(HAP.tap);playStation(byId(playBtn.dataset.play));return}
   const showAll=e.target.closest('[data-all]');
@@ -2984,7 +3442,7 @@ const themeSeg=$('#themeSeg');
 /* Цвет хрома браузера: тема ИЛИ цвет станции (пока открыт Now Playing) */
 function syncThemeColor(){
   const mc=document.querySelector('meta[name="theme-color"]');if(!mc)return;
-  mc.setAttribute('content',document.documentElement.getAttribute('data-theme')==='light'?'#F5F5F7':'#0A0A0C');
+  mc.setAttribute('content',document.documentElement.getAttribute('data-theme')==='light'?PAL.pale:PAL.deep);
 }
 function applyTheme(t){
   document.documentElement.setAttribute('data-theme',t);
@@ -3072,6 +3530,39 @@ try{
   }
 }catch(e){}
 EQ.apply(); // подсветить сохранённый пресет
+
+/* ==================== ИНИЦИАЛИЗАЦИЯ: палитра и док ==================== */
+(function initPaletteDock(){
+  /* стартовая палитра: последняя станция (если была) либо фирменный красный */
+  let lastSt=null;try{const id=LS.get('last',null);lastSt=id&&byId(id)}catch(e){}
+  if(lastSt){
+    const fb=stationFallback(lastSt);setPalette(fb.c1,fb.c2,true);paintNow(fb);
+    logoPalette(lastSt).then(p=>{if(p&&!curId){setPalette(p.c1,p.c2);paintNow(p)}});
+  }else setPalette(hexHsl('#FA233B'),hexHsl('#8A3BE8'),true);
+
+  /* компактный док: скролл вниз — сворачиваем табы в круг, мини-плеер встаёт между кругами */
+  const main=$('#main'),mq=matchMedia('(max-width:900px)'),dock=m=>document.body.classList.toggle('dock-min',m);
+  let last=0,tick=false;
+  main.addEventListener('scroll',()=>{
+    if(tick)return;tick=true;
+    requestAnimationFrame(()=>{
+      tick=false;
+      if(!mq.matches){dock(false);return}
+      const y=Math.max(0,main.scrollTop),d=y-last;
+      if(y<12)dock(false);else if(d>8)dock(true);else if(d<-8)dock(false);
+      if(Math.abs(d)>8||y<12)last=y;
+    });
+  },{passive:true});
+  const onMq=()=>dock(false);
+  if(mq.addEventListener)mq.addEventListener('change',onMq);
+  /* тап по свёрнутому кругу — раскрыть табы (вместо перехода на вкладку) */
+  $('#tabs').addEventListener('click',e=>{
+    if(!document.body.classList.contains('dock-min'))return;
+    e.stopPropagation();e.preventDefault();buzz(HAP.tap);dock(false);
+  },true);
+  syncDock();
+})();
+
 </script>
 </body>
 </html>
