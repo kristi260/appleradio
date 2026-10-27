@@ -8,9 +8,6 @@
 <link rel="icon" id="favicon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20viewBox=%270%200%2064%2064%27%3E%3Cdefs%3E%3ClinearGradient%20id=%27g%27%20x1=%270%27%20y1=%270%27%20x2=%271%27%20y2=%271%27%3E%3Cstop%20offset=%270%27%20stop-color=%27%23FF6B7F%27/%3E%3Cstop%20offset=%27.68%27%20stop-color=%27%23B80F27%27/%3E%3Cstop%20offset=%271%27%20stop-color=%27%235B22A6%27/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect%20width=%2764%27%20height=%2764%27%20rx=%2715%27%20fill=%27url%28%23g%29%27/%3E%3Cpath%20transform=%27translate%288%208%29%20scale%282%29%27%20d=%27M2.5%2012c2.2%200%202.6-7%204.8-7s2.6%2014%204.8%2014%202.6-14%204.8-14%202.6%207%204.8%207%27%20fill=%27none%27%20stroke=%27%23fff%27%20stroke-width=%272.4%27%20stroke-linecap=%27round%27%20stroke-linejoin=%27round%27/%3E%3C/svg%3E">
 <title>Герц — мировое радио</title>
 <script>try{document.documentElement.setAttribute('data-theme',JSON.parse(localStorage.getItem('ukRadio.theme'))||'dark')}catch(e){document.documentElement.setAttribute('data-theme','dark')}</script>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 /* ============ TOKENS ============
    Цвета интерфейса считаются в JS из логотипа играющей станции (setPalette):
@@ -30,7 +27,9 @@
 
 :root{
   color-scheme:dark;
-  transition:--ac .8s ease,--ac-hi .8s ease,--ac-lo .8s ease,--ac2 .8s ease,--ac2-lo .8s ease,--ac-deep .8s ease,--ac-pale .8s ease,--on-ac .5s ease,--nc1 .9s ease,--nc2 .9s ease,--nc3 .9s ease;
+  /* безопасные зоны (вырез камеры, системные панели). В Android-оболочке их точно задаёт нативный код */
+  --sat:env(safe-area-inset-top,0px);--sab:env(safe-area-inset-bottom,0px);--sal:env(safe-area-inset-left,0px);--sar:env(safe-area-inset-right,0px);
+  transition:--ac .8s ease,--ac-hi .8s ease,--ac-lo .8s ease,--ac2 .8s ease,--ac2-lo .8s ease,--ac-deep .8s ease,--ac-pale .8s ease,--on-ac .5s ease;
   --accent:var(--ac);
   --accent-2:var(--ac-hi);
   --accent-grad:linear-gradient(180deg,var(--ac-hi),var(--ac));
@@ -105,7 +104,8 @@ svg.h-fill,svg.pp-pause{display:none}
 
 /* ============ AMBIENT ============ */
 #ambient{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
-#ambient .blob{position:absolute;border-radius:50%;filter:blur(110px);opacity:.75}
+/* радиальные градиенты уже мягкие — тяжёлый filter:blur на трёх экранных слоях не нужен */
+#ambient .blob{position:absolute;border-radius:50%;opacity:.75}
 html[data-theme="light"] #ambient .blob{opacity:.4}
 #ambient .b1{width:58vw;height:58vw;top:-22%;left:-12%;background:radial-gradient(circle,var(--c1),transparent 66%);animation:drift 32s ease-in-out infinite alternate}
 #ambient .b2{width:52vw;height:52vw;bottom:-26%;right:-14%;background:radial-gradient(circle,var(--c2),transparent 66%);animation:drift 38s ease-in-out infinite alternate-reverse}
@@ -118,7 +118,7 @@ html[data-theme="light"] #ambient .b3{opacity:.22}
 }
 
 /* ============ APP GRID ============ */
-#app{position:relative;z-index:1;height:100dvh;display:grid;grid-template-columns:var(--sidebar-w) 1fr;grid-template-rows:1fr auto}
+#app{position:relative;z-index:1;height:100dvh;padding-left:var(--sal);padding-right:var(--sar);display:grid;grid-template-columns:var(--sidebar-w) 1fr;grid-template-rows:1fr auto}
 
 /* ============ SIDEBAR ============ */
 #sidebar{
@@ -171,8 +171,8 @@ html[data-theme="light"] .searchbox:focus-within{background:#fff}
 #main{--px:34px;grid-row:1;min-width:0;overflow-y:auto;overflow-x:hidden;position:relative;padding:0 var(--px) 40px}
 #topbar{
   position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:12px;
-  height:calc(40px + env(safe-area-inset-top,0px));
-  margin:0 calc(var(--px)*-1);padding:env(safe-area-inset-top,0px) var(--px) 0;
+  height:calc(40px + var(--sat));
+  margin:0 calc(var(--px)*-1);padding:var(--sat) var(--px) 0;
 }
 /* мягкая «scroll-edge» подложка: контент уходит под размытие */
 #topbar::before{
@@ -260,7 +260,7 @@ html[data-theme="light"] .sheet-back{background:rgba(50,50,55,.28)}
 #sheet.open .sheet-back{opacity:1}
 .sheet-panel{
   position:absolute;left:50%;bottom:0;transform:translate(-50%,106%);width:min(440px,100%);
-  max-height:min(66dvh,560px);display:flex;flex-direction:column;padding-bottom:env(safe-area-inset-bottom);
+  max-height:min(66dvh,560px);display:flex;flex-direction:column;padding-bottom:var(--sab);
   background:color-mix(in srgb,var(--ac) 12%,rgba(26,26,30,.9));
   -webkit-backdrop-filter:blur(30px) saturate(1.7);backdrop-filter:blur(30px) saturate(1.7);
   border:1px solid rgba(255,255,255,.12);border-bottom:none;border-radius:22px 22px 0 0;
@@ -405,12 +405,12 @@ html[data-theme="light"] .badge-live{background:color-mix(in srgb,var(--ac) 14%,
 .badge-live.rec .dot,.badge-live[hidden]{display:none}
 .eq{display:flex;align-items:flex-end;gap:2.5px;height:13px;flex:none;opacity:0;transition:opacity .3s}
 .eq.playing{opacity:1}
-.eq i{width:3px;border-radius:2px;background:var(--accent-2);height:30%}
+.eq i{width:3px;height:100%;border-radius:2px;background:var(--accent-2);transform:scaleY(.3);transform-origin:50% 100%}
 .eq.playing i:nth-child(1){animation:eq .9s ease-in-out infinite alternate}
 .eq.playing i:nth-child(2){animation:eq .7s .15s ease-in-out infinite alternate}
 .eq.playing i:nth-child(3){animation:eq 1.1s .05s ease-in-out infinite alternate}
 .eq.playing i:nth-child(4){animation:eq .8s .22s ease-in-out infinite alternate}
-@keyframes eq{from{height:22%}to{height:100%}}
+@keyframes eq{from{transform:scaleY(.22)}to{transform:scaleY(1)}}
 .p-controls,.p-right{display:flex;align-items:center;margin-left:auto}
 .p-controls{gap:6px}
 .p-right{gap:10px}
@@ -435,14 +435,14 @@ html[data-theme="light"] input[type=range]::-moz-range-track{background:rgba(0,0
 /* ============ NOW PLAYING ============ */
 #now{
   position:fixed;inset:0;z-index:100;display:flex;flex-direction:column;align-items:center;
-  padding:max(22px,env(safe-area-inset-top)) 24px max(26px,env(safe-area-inset-bottom));
+  padding:max(22px,var(--sat)) 24px max(26px,var(--sab));
   color:var(--text);opacity:0;visibility:hidden;pointer-events:none;touch-action:manipulation;
-  transition:opacity .38s ease,visibility 0s .38s;
+  transition:opacity .38s ease,visibility 0s .38s,--nc1 .9s ease,--nc2 .9s ease,--nc3 .9s ease;
   /* Now Playing всегда в «тёмной» палитре, как в Apple Music */
   --glass:rgba(255,255,255,.072);--brd:rgba(255,255,255,.09);
   --text:#F5F5F7;--text2:rgba(235,235,245,.62);--text3:rgba(235,235,245,.36);--accent-2:var(--ac-hi);
 }
-#now.open{opacity:1;visibility:visible;pointer-events:auto;transition:opacity .38s ease,visibility 0s}
+#now.open{opacity:1;visibility:visible;pointer-events:auto;transition:opacity .38s ease,visibility 0s,--nc1 .9s ease,--nc2 .9s ease,--nc3 .9s ease}
 .now-bg{
   position:absolute;inset:0;
   background:radial-gradient(95% 60% at 50% 0%,color-mix(in srgb,var(--nc2) 60%,transparent),transparent 72%),linear-gradient(180deg,var(--nc1),var(--nc3));
@@ -457,7 +457,7 @@ html[data-theme="light"] input[type=range]::-moz-range-track{background:rgba(0,0
 }
 .ctl-glass:active{transform:scale(.92)}
 .ctl-glass.active{color:var(--accent-2)}
-#nowMeta{position:relative;text-align:center;margin-bottom:1.6vh;max-width:480px}
+#nowMeta{position:relative;text-shadow:0 2px 18px rgba(0,0,0,.28);text-align:center;margin-bottom:1.6vh;max-width:480px}
 #nowMeta h2{font-size:26px;font-weight:800;letter-spacing:-.5px;margin-bottom:6px}
 #nowMeta p{font-size:14.5px;color:color-mix(in srgb,var(--text) 74%,transparent)}
 #nowCtl{position:relative;display:flex;align-items:center;gap:24px;margin-bottom:1.6vh}
@@ -533,7 +533,7 @@ img.ok + .ph-l{opacity:0}
 .row-side{flex:none;width:34px;display:grid;place-items:center;color:var(--text2);font-size:15px}
 .row-side .eq{height:14px;opacity:.55}
 .row-side .eq.playing{opacity:1}
-.row-side .eq:not(.playing) i{height:45%}
+.row-side .eq:not(.playing) i{transform:scaleY(.45)}
 
 /* ============ TOAST ============ */
 #toast{
@@ -570,9 +570,16 @@ html[data-theme="light"] #toast{background:color-mix(in srgb,var(--ac) 8%,rgba(2
   html #now .now-row:hover,html #now .ctl:not(.main):hover{background:rgba(255,255,255,.1)}
 }
 
+/* узкий десктоп и телефон в landscape (901–1000 px): плеер не должен выходить за экран */
+@media(min-width:901px) and (max-width:1000px){
+  .vol input[type=range]{display:none}
+  .p-info{max-width:170px}
+  .p-right{gap:4px}
+}
+
 /* ============ RESPONSIVE: телефон / планшет в портрете ============ */
 @media(max-width:900px){
-  :root{--bar-h:46px;--dock-gap:8px;--dock-b:calc(6px + env(safe-area-inset-bottom,0px));--dock-full:calc(var(--dock-b) + var(--bar-h)*2 + var(--dock-gap))}
+  :root{--bar-h:46px;--dock-gap:8px;--dock-b:calc(6px + var(--sab));--dock-full:calc(var(--dock-b) + var(--bar-h)*2 + var(--dock-gap))}
   body{--dock-top:var(--dock-full)}
   body.dock-min{--dock-top:calc(var(--dock-b) + var(--bar-h))}
   #app{grid-template-columns:1fr;grid-template-rows:1fr}
@@ -698,10 +705,10 @@ html[data-theme="light"] #toast{background:color-mix(in srgb,var(--ac) 8%,rgba(2
   #now{
     display:grid;grid-template-columns:minmax(280px,6fr) minmax(280px,5fr);grid-template-rows:minmax(0,1fr);grid-template-areas:"hero list";
     justify-content:center;column-gap:5vw;align-items:center;
-    padding:max(12px,env(safe-area-inset-top)) max(4vw,env(safe-area-inset-right)) max(14px,env(safe-area-inset-bottom)) max(4vw,env(safe-area-inset-left));
+    padding:max(12px,var(--sat)) max(4vw,var(--sar)) max(14px,var(--sab)) max(4vw,var(--sal));
   }
   /* кнопки шапки — абсолютом в углу: список начинается у самого верха */
-  #now .now-top{position:absolute;top:max(12px,env(safe-area-inset-top));left:max(4vw,env(safe-area-inset-left));z-index:6;margin:0;width:auto;max-width:none;gap:10px;pointer-events:none}
+  #now .now-top{position:absolute;top:max(12px,var(--sat));left:max(4vw,var(--sal));z-index:6;margin:0;width:auto;max-width:none;gap:10px;pointer-events:none}
   #now .now-top .ctl-glass{pointer-events:auto}
   .now-hero{grid-area:hero;justify-self:center;margin-top:0}
   .now-list{grid-area:list;display:block;align-self:stretch;height:auto;max-height:calc(100dvh - 30px);min-height:0;max-width:none;margin-top:0;padding-top:0}
@@ -719,7 +726,7 @@ html[data-theme="light"] #toast{background:color-mix(in srgb,var(--ac) 8%,rgba(2
 @media(orientation:landscape) and (max-height:520px){
   :root{--bar-h:40px}
   #main{--px:20px}
-  #topbar{height:calc(36px + env(safe-area-inset-top,0px))}
+  #topbar{height:calc(36px + var(--sat))}
   .large-title{font-size:21px;padding:8px 0 0}
   .large-sub{font-size:12px;padding-bottom:8px}
   #hero{padding:14px 22px;border-radius:20px;margin:4px 0}
@@ -732,13 +739,13 @@ html[data-theme="light"] #toast{background:color-mix(in srgb,var(--ac) 8%,rgba(2
   .shelf-head{padding:4px 2px 8px}
   .shelf-head h3{font-size:16px}
   .grid{gap:14px 12px}
-  #player{left:max(10px,env(safe-area-inset-left));right:max(10px,env(safe-area-inset-right))}
-  body.dock-min #player{left:calc(max(10px,env(safe-area-inset-left)) + var(--bar-h) + 8px);right:calc(max(10px,env(safe-area-inset-right)) + var(--bar-h) + 8px)}
-  #tabs{left:max(10px,env(safe-area-inset-left));width:calc(100% - max(10px,env(safe-area-inset-left)) - max(10px,env(safe-area-inset-right)))}
-  #dockSearch{right:max(10px,env(safe-area-inset-right))}
+  #player{left:max(10px,var(--sal));right:max(10px,var(--sar))}
+  body.dock-min #player{left:calc(max(10px,var(--sal)) + var(--bar-h) + 8px);right:calc(max(10px,var(--sar)) + var(--bar-h) + 8px)}
+  #tabs{left:max(10px,var(--sal));width:calc(100% - max(10px,var(--sal)) - max(10px,var(--sar)))}
+  #dockSearch{right:max(10px,var(--sar))}
   #tabs button svg{font-size:17px}
   #tabs button span{font-size:8.5px}
-  #now .now-top{top:max(8px,env(safe-area-inset-top))}
+  #now .now-top{top:max(8px,var(--sat))}
   .row-art{width:38px;height:38px;border-radius:9px}
   .now-row{gap:9px;padding:5px 6px;border-radius:10px}
   .row-txt b{font-size:13px}
@@ -747,42 +754,31 @@ html[data-theme="light"] #toast{background:color-mix(in srgb,var(--ac) 8%,rgba(2
 
 /* ============ NOW PLAYING: обложка во всю ширину, растворяющаяся в цвет станции ============ */
 .now-cover{
-  position:absolute;top:0;left:0;right:0;height:min(108vw,56vh);pointer-events:none;overflow:hidden;
+  position:absolute;top:0;left:0;right:0;height:min(92vw,44vh);pointer-events:none;overflow:hidden;
   background:linear-gradient(160deg,var(--k1,transparent),var(--k2,transparent));
   -webkit-mask-image:linear-gradient(#000 48%,transparent);mask-image:linear-gradient(#000 48%,transparent);
-  transition:filter .6s ease,opacity .6s ease;
+  transition:opacity .45s ease;
 }
 .now-cover::after{content:"";position:absolute;inset:0;background:radial-gradient(100% 70% at 50% 0%,rgba(255,255,255,.18),transparent 60%)}
 .now-cover img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .8s ease}
-/* логотип на светлой подложке: multiply «растворяет» белое в цвет фона */
-.now-cover.light img{mix-blend-mode:multiply}
-.now-cover.light{background:none}
 .nc-mono{position:absolute;inset:0;display:grid;place-items:center;padding-bottom:14%;font-size:min(34vw,26vh);font-weight:800;letter-spacing:-.04em;color:rgba(255,255,255,.26);transition:opacity .5s}
 .now-cover.has .nc-mono{opacity:0}
-#now.paused .now-cover{filter:saturate(.5) brightness(.82)}
-#now.wait .now-cover{animation:coverBreath 1.7s ease-in-out infinite}
+/* пауза и подключение — спокойное приглушение (без filter, blend и бесконечных анимаций: они давали мерцание на смене станции) */
+#now.paused .now-cover,#now.wait .now-cover{opacity:.7}
 /* Логотипы меньше 480 px (фавиконки) не растягиваем на весь экран: арт в натуральный размер над названием,
-   а на фон — их же размытая копия на весь экран (см. setCover) */
+   (см. setCover) */
 .now-art{
   display:none;position:relative;flex:none;width:min(64vw,300px,30vh);aspect-ratio:1;margin:0 auto 2.2vh;border-radius:22px;overflow:hidden;
   background:linear-gradient(135deg,var(--k1,#444),var(--k2,#222));
   box-shadow:0 24px 60px rgba(0,0,0,.45),0 0 0 1px rgba(255,255,255,.12);
-  transition:filter .6s ease,transform .5s cubic-bezier(.3,1.2,.4,1);
+  transition:opacity .45s ease,transform .45s cubic-bezier(.3,1.2,.4,1);
 }
 #now.art .now-art{display:block}
 #now.art .now-cover{display:none}
 .now-art img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .5s ease}
 .now-art img.in{opacity:1}
-#now.paused .now-art{filter:saturate(.55) brightness(.85);transform:scale(.94)}
-#now.wait .now-art{animation:coverBreath 1.7s ease-in-out infinite}
-.now-backdrop{
-  position:absolute;inset:0 0 30% 0;pointer-events:none;opacity:0;transition:opacity .9s ease;
-  background:var(--cv) center/cover;filter:blur(44px) saturate(1.35) brightness(.9);transform:scale(1.25);
-  -webkit-mask-image:linear-gradient(#000 35%,transparent);mask-image:linear-gradient(#000 35%,transparent);
-}
-#now.art .now-backdrop{opacity:.7}
+#now.paused .now-art,#now.wait .now-art{opacity:.78;transform:scale(.95)}
 @media(orientation:landscape) and (min-width:600px){.now-art{width:clamp(200px,36vh,320px)}}
-@keyframes coverBreath{0%,100%{opacity:.62}50%{opacity:1}}
 @media(orientation:landscape) and (min-width:600px){
   .now-cover{
     right:auto;left:max(0px,calc(27% - 330px));width:min(55%,660px);height:min(84vh,56vw);
@@ -833,14 +829,60 @@ html[data-theme="light"] .pbar{background:rgba(0,0,0,.1)}
 #sResults>.shelf-head{padding-top:6px}
 .shelf-head button[data-qclear]{color:var(--text2)}
 
-/* ============ СКЕЛЕТОНЫ: мерцание, пока логотип загружается ============ */
-.sk::before{content:"";position:absolute;inset:0;z-index:3;pointer-events:none;background:linear-gradient(100deg,transparent 30%,rgba(255,255,255,.3) 50%,transparent 70%);transform:translateX(-100%);animation:shim 1.35s ease-in-out infinite}
+/* ============ СКЕЛЕТОНЫ: мерцание, пока логотип загружается (3 прохода, не бесконечно: зависший логотип не должен жечь батарею) ============ */
+.sk::before{content:"";position:absolute;inset:0;z-index:3;pointer-events:none;background:linear-gradient(100deg,transparent 30%,rgba(255,255,255,.3) 50%,transparent 70%);transform:translateX(-100%);animation:shim 1.35s ease-in-out 3 forwards}
 @keyframes shim{to{transform:translateX(100%)}}
+
+/* ============ SPLASH: настройка радиоприёмника ============ */
+#splash{
+  position:fixed;inset:0;z-index:1000;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;color:#fff;
+  background:radial-gradient(90% 70% at 50% 42%,color-mix(in srgb,var(--ac) 38%,#0b0608),#0b0608 72%);
+  animation:splashOut .55s ease 2.35s forwards;
+}
+#splash.out{animation:splashOut .35s ease forwards}
+@keyframes splashOut{to{opacity:0;visibility:hidden;transform:scale(1.04)}}
+.sp-rings{position:absolute;left:50%;top:42%;width:0;height:0}
+.sp-rings i{position:absolute;left:-150px;top:-150px;width:300px;height:300px;border-radius:50%;border:1.5px solid color-mix(in srgb,var(--ac-hi) 70%,transparent);opacity:0;animation:spRing 2.2s cubic-bezier(.15,.6,.3,1) infinite}
+.sp-rings i:nth-child(2){animation-delay:.45s}.sp-rings i:nth-child(3){animation-delay:.9s}.sp-rings i:nth-child(4){animation-delay:1.35s}
+@keyframes spRing{0%{transform:scale(.18);opacity:0}15%{opacity:.8}100%{transform:scale(2.6);opacity:0}}
+.sp-core{position:relative;display:flex;flex-direction:column;align-items:center;margin-top:-14vh}
+.sp-logo{
+  display:grid;place-items:center;width:104px;height:104px;border-radius:29px;
+  background:linear-gradient(145deg,var(--ac-hi),var(--ac-lo) 68%,var(--ac2-lo));
+  box-shadow:0 20px 60px color-mix(in srgb,var(--ac) 60%,transparent),inset 0 1px 0 rgba(255,255,255,.4);
+  animation:spLogo .9s cubic-bezier(.2,1.3,.4,1) .1s both;
+}
+.sp-logo svg{width:70px;height:70px;overflow:visible}
+.sp-logo path{fill:none;stroke:#fff;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:1;stroke-dashoffset:1;animation:spDraw 1s cubic-bezier(.5,0,.2,1) .35s forwards,spGlow 1.6s ease-in-out 1.3s infinite}
+@keyframes spLogo{from{opacity:0;transform:scale(.55) rotate(-8deg)}to{opacity:1;transform:none}}
+@keyframes spDraw{to{stroke-dashoffset:0}}
+@keyframes spGlow{50%{filter:drop-shadow(0 0 5px rgba(255,255,255,.9))}}
+.sp-name{margin-top:26px;font-size:46px;font-weight:800;line-height:1;animation:spName .9s cubic-bezier(.2,.8,.2,1) .7s both}
+@keyframes spName{from{opacity:0;transform:translateY(16px);filter:blur(10px);letter-spacing:.22em}to{opacity:1;transform:none;filter:none;letter-spacing:-.02em}}
+.sp-sub{margin-top:10px;font-size:12px;font-weight:600;letter-spacing:.32em;text-transform:uppercase;color:rgba(255,255,255,.6);animation:spFade .8s ease 1.1s both}
+@keyframes spFade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+/* шкала настройки: полотно едет, красная стрелка «ловит» волну, цифры бегут */
+.sp-dial{position:absolute;left:0;right:0;bottom:calc(9vh + var(--sab));display:flex;flex-direction:column;align-items:center;gap:12px;animation:spFade .7s ease .9s both}
+.sp-scale{position:relative;width:100%;height:46px;overflow:hidden;-webkit-mask-image:linear-gradient(90deg,transparent,#000 22%,#000 78%,transparent);mask-image:linear-gradient(90deg,transparent,#000 22%,#000 78%,transparent)}
+.sp-ticks{position:absolute;left:-240px;top:0;width:calc(100% + 480px);height:100%;animation:spSlide 2.1s cubic-bezier(.3,.1,.2,1) .9s both;
+  background:repeating-linear-gradient(90deg,rgba(255,255,255,.55) 0 1.5px,transparent 1.5px 40px) 0 100%/100% 26px no-repeat,repeating-linear-gradient(90deg,rgba(255,255,255,.28) 0 1px,transparent 1px 8px) 0 100%/100% 12px no-repeat}
+@keyframes spSlide{from{transform:translateX(120px)}to{transform:translateX(-80px)}}
+.sp-needle{position:absolute;left:50%;top:-2px;width:2px;height:50px;margin-left:-1px;border-radius:2px;background:var(--ac-hi);box-shadow:0 0 14px var(--ac-hi),0 0 30px var(--ac)}
+.sp-freq{font-size:15px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:.08em;color:rgba(255,255,255,.85)}
+.sp-freq b{font-weight:800;color:var(--ac-hi);margin-left:6px;font-size:12px;letter-spacing:.2em}
+@media(prefers-reduced-motion:reduce){#splash{animation:splashOut .4s ease .8s forwards}.sp-rings,.sp-ticks{animation:none}.sp-logo path{animation:none;stroke-dashoffset:0}}
+
+/* ============ ЭКОНОМИЯ БАТАРЕИ: на сенсорных экранах бесконечные декоративные анимации выключены ============ */
+@media(hover:none){
+  #ambient .blob,#hero .waves circle,.hero-pill .dot,.pbar.live.run i,#nowProg.live.run .np-bar i{animation:none!important}
+  #hero .waves circle{opacity:.45}
+}
+@media(hover:hover){#ambient .blob{will-change:transform}}
 
 /* ============ REDUCED MOTION ============ */
 @media(prefers-reduced-motion:reduce){
   :root{transition:none}
-  #ambient .blob,#hero .waves circle,.fav-ill,.fav-ill .ring,.tile .spin,.eq.playing i,.hero-pill .dot,.badge-live .dot,.sk::before,.pbar i,.np-bar i,#nowProg.live .np-l::before,#now.wait .now-cover,#now.wait .now-art{animation:none!important}
+  #ambient .blob,#hero .waves circle,.fav-ill,.fav-ill .ring,.tile .spin,.eq.playing i,.hero-pill .dot,.badge-live .dot,.sk::before,.pbar i,.np-bar i,#nowProg.live .np-l::before{animation:none!important}
   #player,#tabs,#dockSearch,#tabs .lens,#tabs button,#app::after {transition-duration:.01ms!important}
 }
 </style>
@@ -880,6 +922,18 @@ html[data-theme="light"] .pbar{background:rgba(0,0,0,.1)}
   <symbol id="i-searchf" viewBox="0 0 24 24"><path d="M10 2.7a7.3 7.3 0 1 1 0 14.6 7.3 7.3 0 0 1 0-14.6zm0 2a5.3 5.3 0 1 0 0 10.6A5.3 5.3 0 0 0 10 4.7zm7.2 11.6 3.5 3.5-1.4 1.4-3.5-3.5 1.4-1.4z"/></symbol>
 </svg>
 
+<div id="splash" aria-hidden="true">
+  <div class="sp-rings"><i></i><i></i><i></i><i></i></div>
+  <div class="sp-core">
+    <div class="sp-logo"><svg viewBox="0 0 24 24"><path pathLength="1" d="M2.5 12c2.2 0 2.6-7 4.8-7s2.6 14 4.8 14 2.6-14 4.8-14 2.6 7 4.8 7"/></svg></div>
+    <div class="sp-name">Герц</div>
+    <div class="sp-sub">Hertz · мировое радио</div>
+  </div>
+  <div class="sp-dial">
+    <div class="sp-scale"><div class="sp-ticks"></div><i class="sp-needle"></i></div>
+    <div class="sp-freq"><span id="spFreq">87.5</span><b>FM</b></div>
+  </div>
+</div>
 <div id="app">
   <div id="ambient" aria-hidden="true"><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div></div>
 
@@ -892,9 +946,9 @@ html[data-theme="light"] .pbar{background:rgba(0,0,0,.1)}
     </div>
     <nav class="snav" aria-label="Разделы">
       <button data-view="home" class="active"><svg class="ic"><use href="#i-home"/></svg>Главная</button>
-      <button data-view="recent"><svg class="ic"><use href="#i-grid"/></svg>Новое</button>
+      <button data-view="recent"><svg class="ic"><use href="#i-grid"/></svg>Недавние</button>
       <button data-view="all"><svg class="ic"><use href="#i-radio"/></svg>Радио</button>
-      <button data-view="fav"><svg class="ic"><use href="#i-lib"/></svg>Медиатека</button>
+      <button data-view="fav"><svg class="ic"><use href="#i-lib"/></svg>Избранные</button>
     </nav>
     <div class="side-label">Недавно играли</div>
     <div id="recentList"></div>
@@ -965,9 +1019,9 @@ html[data-theme="light"] .pbar{background:rgba(0,0,0,.1)}
   <!-- MOBILE TAB BAR -->
   <nav id="tabs" aria-label="Разделы"><i class="lens" aria-hidden="true"></i>
     <button data-view="home" class="on"><svg class="ic s-base"><use href="#i-home"/></svg><svg class="ic s-fill"><use href="#i-homef"/></svg><span>Главная</span></button>
-    <button data-view="recent"><svg class="ic s-base"><use href="#i-grid"/></svg><svg class="ic s-fill"><use href="#i-gridf"/></svg><span>Новое</span></button>
+    <button data-view="recent"><svg class="ic s-base"><use href="#i-grid"/></svg><svg class="ic s-fill"><use href="#i-gridf"/></svg><span>Недавние</span></button>
     <button data-view="all"><svg class="ic s-base"><use href="#i-radio"/></svg><svg class="ic s-fill"><use href="#i-radiof"/></svg><span>Радио</span></button>
-    <button data-view="fav"><svg class="ic s-base"><use href="#i-lib"/></svg><svg class="ic s-fill"><use href="#i-libf"/></svg><span>Медиатека</span></button>
+    <button data-view="fav"><svg class="ic s-base"><use href="#i-lib"/></svg><svg class="ic s-fill"><use href="#i-libf"/></svg><span>Избранные</span></button>
     <button data-view="search"><svg class="ic s-base"><use href="#i-search"/></svg><svg class="ic s-fill"><use href="#i-searchf"/></svg><span>Поиск</span></button>
   </nav>
   <button id="dockSearch" data-view="search" aria-label="Поиск"><svg class="ic"><use href="#i-search"/></svg></button>
@@ -975,7 +1029,6 @@ html[data-theme="light"] .pbar{background:rgba(0,0,0,.1)}
   <!-- NOW PLAYING -->
   <div id="now" role="dialog" aria-modal="true" aria-label="Сейчас в эфире" aria-hidden="true">
     <div class="now-bg"></div>
-    <div class="now-backdrop" aria-hidden="true"></div>
     <div class="now-cover" id="nowCover" aria-hidden="true"><span class="nc-mono" id="ncMono"></span><img id="coverA" alt=""><img id="coverB" alt=""></div>
     <div class="now-scrim"></div>
     <div class="now-top">
@@ -1037,36 +1090,46 @@ html[data-theme="light"] .pbar{background:rgba(0,0,0,.1)}
 /* ==================== ДАННЫЕ ==================== */
 const F=u=>'https://t0.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url='+encodeURIComponent('https://'+u)+'&size=256';
 const LG={bbc:F('bbc.co.uk/'), heart:"https://www.heart.co.uk/assets_v4r/heart/img/favicon-196x196.png", rmf:F('rmf.fm/'), or:F('www3.nhk.or.jp/'), r98fm:F('98fm.com/'), antyradio:"https://gfx.antyradio.pl/design/antyradio/src/images/favicon/favicon_180x180.png", r101:F('101.ru/'), absoluteradio:F('absoluteradio.co.uk/'), celsoazevedo:"https://www.celsoazevedo.com/files/2022/virgin-radio-uk.jpg", smoothradio:"https://www.smoothradio.com/assets_v4r/smooth/img/favicon-196x196.png", classicfm:F('classicfm.com/'), radiox:"https://www.radiox.co.uk/assets_v4r/xfm/img/favicon-196x196.png", somafm:"https://somafm.com/img3/secretagent-400.jpg", wp:"https://i0.wp.com/decayfm.com/wp-content/uploads/2018/12/cropped-512-1.jpg?fit=180%2c180&#038;ssl=1", blogspot:"https://3.bp.blogspot.com/-BTWauI1ML7o/XZOklz5WuRI/AAAAAAAAAeA/R8qBxhme8UEELRogqYOhtWG4p0BVhiwVgCK4BGAYYCw/s752/free%2Bancho.jpg", eska:"https://www.eska.tv/safari-pinned-tab.svg", eska2:"https://www.eska.pl/web-app-manifest-512x512.png", hearme:"https://hearme.fm/wp-content/uploads/2024/06/cropped-2024-Redrafted-Transparent-Circular-192x192.png", antyradio2:"https://gfx-player.antyradio.pl/design/player_antyradio/images/favicon/apple-touch-icon.png", xpand:"https://www.xpand.website/assets/images/Radifm_0600.png", severmedia:F('severmedia.ru/'), capital:"https://www.capital.it/wp-content/themes/network-capital/favicon.ico", amazonaws:"https://bocir-prod-bucket.s3.eu-west-1.amazonaws.com/radios/urbanhit/images/favicon.vnd.microsoft.icon", amazonaws2:"https://bocir-prod-bucket.s3.eu-west-1.amazonaws.com/radios/latina/images/favicon.ico", cafedelmar:"https://cafedelmar.com/apple-touch-icon.png", cadena100:"https://www.cadena100.es/estaticos/apple-touch-icon-192x192.png", funkidslive:F('funkidslive.com/')};
+/* общие префиксы адресов потоков */
+const U=[
+"https://playerservices.streamtheworld.com/api/livestream-redirect/",
+"https://4c4b867c89244861ac216426883d1ad0.msvdn.net/",
+"https://rogers-hls.leanstream.co/rogers/",
+"https://as-hls-ww-live.akamaized.net/",
+"https://media-ssl.musicradio.com/",
+"https://archive.org/download/",
+"https://stream.zeno.fm/"
+];
 const STATIONS=[
-{id:'am1',cc:'US',name:"Apple Music 1",sub:"Apple Music · Прямой эфир из Лос-Анджелеса",genre:'Поп',c:['#FA233B','#FA0028'],logo:"data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1MTIiIGhlaWdodD0iNTEyIiB2aWV3Qm94PSIwIDAgMTk2MCAxOTYwIj48cmVjdCB3aWR0aD0iMTk2MCIgaGVpZ2h0PSIxOTYwIiBmaWxsPSIjZmZmZmZmIi8+PGRlZnMgLz48ZyBzdHlsZT0iZGlzcGxheTppbmxpbmUiPjxwYXRoIHN0eWxlPSJkaXNwbGF5OmlubGluZTtmaWxsOiNmYTAwMjg7ZmlsbC1vcGFjaXR5OjE7c3Ryb2tlLXdpZHRoOjIuODI4NDMiIGQ9Im0gODU0LjMxMzUsOTg5Ljc1MDQ3IGMgMCwtMTk4LjM0MzQ1IC0wLjQ2NTcsLTM2MC42MjQ0NiAtMS4wMzUsLTM2MC42MjQ0NiAtMC41NjkzLDAgLTI0LjE2MTcsMTQuMTQ2NDcgLTU5Ljc2MDksMzEuNDM2NTYgLTM1LjU5OTMsMTcuMjkwMTIgLTg1LjA4MTI5LDM5LjY3MzA1IC0xMDcuMDMxLDUwLjcyNjgyIGwgLTQ0LjMwNTEsMTkuMjkwMjcgViA2MDYuOTUxODcgNDc5LjMyNDA5IEMgNzMxLjMxNjMzLDQzMy4xMDY1MiA4MTQuODY5MzUsMzg3LjcxMDc2IDkwNC40MDc5LDM0Mi4yODMzIGggMTIyLjM3NDEgMTE2LjM3NDIgViA4NDguMzI5MTEgMTM1MC4zNzUgSCAxMDAxLjczNDkgODU0LjMxMzUgWiIgLz48cGF0aCBzdHlsZT0iZmlsbDojNGE0YTRhO2ZpbGwtb3BhY2l0eToxO3N0cm9rZTpub25lO3N0cm9rZS13aWR0aDoxcHg7c3Ryb2tlLWxpbmVjYXA6YnV0dDtzdHJva2UtbGluZWpvaW46bWl0ZXI7c3Ryb2tlLW9wYWNpdHk6MSIgZD0ibSA0NzEuOTkzNzgsMTYzMS45MTQxIGMgMCwwIC0zMS4zNzc4NywwLjk3MjIgLTMxLjgxOTgxLDM3LjAzNDcgMCwwIDMwLjU2MzU5LDEuNTA0NCAzMS44MTk4MSwtMzcuMDM0NyB6IiAvPjxwYXRoIHN0eWxlPSJmaWxsOiM0YTRhNGE7ZmlsbC1vcGFjaXR5OjE7c3Ryb2tlLXdpZHRoOjAuMTI1IiBkPSJtIDQ0MC44MzExNiwxNjY2LjU2OTYgYyAwLjE0Njg2LC0zLjM5MyAwLjc2MTQ4LC03LjI1MzIgMS42NTI0MywtMTAuMzc4MiAxLjE1ODE0LC00LjA2MjEgMi45NTg0OCwtNy43NDAxIDUuMzk5NDgsLTExLjAzMDggMS4yMjQyNywtMS42NTA1IDQuMjQ1MzQsLTQuNjczNyA1Ljg2NzA5LC01Ljg3MTMgNC4yMzkzNywtMy4xMzA3IDguOTI3MTMsLTUuMTg3MSAxNC4yODg2NywtNi4yNjgxIDAuODU5MzgsLTAuMTczMiAxLjk3NjIxLC0wLjM1MzMgMi40ODE4NiwtMC40MDAxIGwgMC45MTkzNSwtMC4wODUgLTAuMDg1NSwxLjIzNzkgYyAtMC42NjM2LDkuNjA3NCAtMi45OTA2MywxNi45NDgyIC03LjIwMDI2LDIyLjcxMzkgLTUuMTU3OTgsNy4wNjQ1IC0xMy4zMzA0MywxMS4zNTc1IC0yMi42MDI3NiwxMS44NzMyIGwgLTAuNzk5ODIsMC4wNDUgeiIgLz48cGF0aCBzdHlsZT0iZGlzcGxheTppbmxpbmU7ZmlsbDojNGE0YTRhO2ZpbGwtb3BhY2l0eToxO3N0cm9rZTpub25lO3N0cm9rZS13aWR0aDoxcHg7c3Ryb2tlLWxpbmVjYXA6YnV0dDtzdHJva2UtbGluZWpvaW46bWl0ZXI7c3Ryb2tlLW9wYWNpdHk6MSIgZD0ibSA1MDAuNzUsMTY4Ni4yNSBjIDAsMCAtMTkuODE4MywxMS45MzA0IC0xNy4xODc1LDMzLjU3ODEgMS4xOTM3OSw5LjgyMzIgNS4xODc1LDE4LjYwOTQgMjEuMTg3NSwyOC45MjE5IC0xNy4yNSw0OC4yNSAtMzYuOTIzOTMsNDMuMDQzOCAtMzkuNzUsNDIuMjUgLTkuMjYxNywtMi42MDE2IC0yMC4xMjUsLTExLjUgLTQyLjEyNSwtMC4yNSAtMjYuNjI1LDcuNSAtNDUuMDE0NywtNTEuODQ4OSAtNDYuMTQ2NDUsLTY0LjMwMzkgLTQuNDEyOTUsLTQ4LjU2NTEgMzAuNTY5ODEsLTU0LjM4NyAzNS42NDY0NSwtNTUuMDcxMSAzLjMzNTU5LC0wLjQ0OTUgMTUuMzc1LDAuODc1IDIxLjYyNSw0LjYyNSAxMC4zNzUsNC42MjUgMTAsMS42MjUgMTcsLTAuODc1IDM1LjUsLTE1IDQ5Ljc1LDExLjEyNSA0OS43NSwxMS4xMjUgeiIgLz48cGF0aCBzdHlsZT0iZGlzcGxheTppbmxpbmU7ZmlsbDojNGE0YTRhO2ZpbGwtb3BhY2l0eToxO3N0cm9rZTpub25lO3N0cm9rZS13aWR0aDoxcHg7c3Ryb2tlLWxpbmVjYXA6YnV0dDtzdHJva2UtbGluZWpvaW46bWl0ZXI7c3Ryb2tlLW9wYWNpdHk6MSIgZD0iTSA1MzAuMzMwMDgsMTc5MC4wMzEzIFYgMTY0My41IEggNTU2Ljc1IEwgNjA0LjUsMTc2MC4xODc1IDY1Mi4xMjUsMTY0My41IGggMjYuMjk5NzYgdiAxNDYuNTMxMyBIIDY1Ny41NjUxMSBWIDE2ODEuNzY1MSBMIDYxMy4xMjUsMTc5MC4wMzEzIEggNTk2LjMxMjUgTCA1NTEuNSwxNjgxLjM3NSB2IDEwOC42NTYzIHoiIC8+PHBhdGggc3R5bGU9ImRpc3BsYXk6aW5saW5lO2ZpbGw6IzRhNGE0YTtmaWxsLW9wYWNpdHk6MTtzdHJva2U6bm9uZTtzdHJva2Utd2lkdGg6MXB4O3N0cm9rZS1saW5lY2FwOmJ1dHQ7c3Ryb2tlLWxpbmVqb2luOm1pdGVyO3N0cm9rZS1vcGFjaXR5OjEiIGQ9Im0gNzAxLjQ0ODYyLDE2ODIuOTE0MSAwLjM3NSw3NC44MzU5IGMgMCwwIC0yLjM5MjU0LDM0LjIzNTQgMzYuNzQ5NDEsMzQuMjM1NCAyNy40MDAzOSwtMC4wODggMzMuMDU3MjQsLTIwLjY4MjkgMzMuMDU3MjQsLTIwLjY4MjkgdiAxOC43Mjg4IGggMjAuOTAzODUgViAxNjgyLjkxNDEgSCA3NzAuOTM3NSBsIC0wLjM1MzU1LDY3Ljk2MDkgYyAwLDAgLTEuNjE0MjEsMjIuMDE4NSAtMjQuMDU1OTcsMjIuMDE4NSAtMjMuOTA3NzQsMCAtMjIuNzUyNDEsLTE1LjY0MDMgLTIyLjc1MjQxLC0xNS42NDAzIGwgMC4xMjUsLTc0LjMzOTEgeiIgLz48cGF0aCBzdHlsZT0iZGlzcGxheTppbmxpbmU7ZmlsbDojNGE0YTRhO2ZpbGwtb3BhY2l0eToxO3N0cm9rZTpub25lO3N0cm9rZS13aWR0aDoxcHg7c3Ryb2tlLWxpbmVjYXA6YnV0dDtzdHJva2UtbGluZWpvaW46bWl0ZXI7c3Ryb2tlLW9wYWNpdHk6MSIgZD0ibSA4NzMuOTc4NTUsMTcxNC44Mzg0IDE5Ljk4MTIsLTAuMDg4IGMgMCwtMjkuMDA3NCAtMzAuMjI4ODIsLTMzLjg2ODggLTQxLjg5NjA4LC0zMy44Njg4IC0zNS4wOTAxNywwIC00MC4xMjgzMSwyMi4xODU1IC00MC4xMjgzMSwzMy40OTkyIDAsMTEuMzEzNyA1LjM5MTY5LDI1LjcyMSA0MC4xMjgzMSwzMS41NTQ2IDI0LjQ4MzU3LDQuMzMxMSAyMi4yNzM4NiwxMi4zNzQ0IDIyLjI3Mzg2LDE0LjU4NDEgMCwyLjIwOTcgMC44ODM4OSwxNC4yMzA1IC0xOS44ODczOCwxNC4yMzA1IC0yNC4yMTg0LDAgLTIzLjMzNDUyLC0xNS42NDQ3IC0yMy4zMzQ1MiwtMTUuNjQ0NyBoIC0yMi4zNjIyNSBjIDAsMCAxLjg1NjE1LDMyLjcwMzcgNDQuODEyODksMzIuNzAzNyA0Mi45NTY3NCwwIDQzLjIyMTksLTMxLjM3NzkgNDMuMjIxOSwtMzEuMzc3OSAwLDAgNS4zMDMzLC0yNC4zOTUyIC0zMS4yMDEwOSwtMzAuNDA1NiAtMTguMjUyMTksLTMuMDA1MiAtMjYuODEyNjIsLTcuMTE3MyAtMjkuNzc1ODIsLTExLjMxMzcgLTUuNjAxNjEsLTcuOTMyOSAtMC4wMTEsLTE0Ljc2MDkgLTAuMDExLC0xNC43NjA5IDAsMCA0LjMwMDcyLC04Ljg5MzQgMjIuNDkwMDksLTUuNDMyOCA5LjYyNzQ5LDEuODMxNiAxMy40NzU4Myw2LjIwODIgMTUuNjg4MjUsMTYuMzIwNyB6IiAvPjxwYXRoIHN0eWxlPSJmaWxsOiM0YTRhNGE7ZmlsbC1vcGFjaXR5OjE7c3Ryb2tlOm5vbmU7c3Ryb2tlLXdpZHRoOjFweDtzdHJva2UtbGluZWNhcDpidXR0O3N0cm9rZS1saW5lam9pbjptaXRlcjtzdHJva2Utb3BhY2l0eToxIiBkPSJtIDEwMjcuNzc5NywxNzE5LjY4MzcgYyAwLDAgLTIuNjUxNiwtMTkuOTc1OCAtMjUuNDU1OCwtMTkuOTc1OCAtMjIuODA0MjMsMCAtMjYuODcwMSwyMy42ODgxIC0yNi44NzAxLDM2Ljc2OTYgMCwxMy4wODE0IDIuNjUxNjUsMzYuNDE2IDI2LjMzOTcsMzYuNDE2IDIzLjY4ODEsMCAyNS40NTU5LC0xOC45MTUxIDI1LjQ1NTksLTE4LjkxNTEgSCAxMDQ5IGMgMCwwIC0zLDM4LjE0NjYgLTQ1Ljg3NSwzOC4xNDY2IC00Mi44NzUsMCAtNTAuMzc1LC0zNS44NzUgLTUwLjM3NSwtNTguMjUgMCwtMjIuMzc1IDEyLjUsLTUyLjg3NSA0OC42MjUsLTUyLjg3NSAzNi4xMjUsMCA0Ny43NSwyNi42MjUgNDcuNzUsMzguNjI1IC0yMS4zNzUsMCAtMjEuMzQ1MywwLjA1OSAtMjEuMzQ1MywwLjA1OSB6IiAvPjxwYXRoIHN0eWxlPSJmaWxsOiNmYTAwMjg7ZmlsbC1vcGFjaXR5OjE7c3Ryb2tlOm5vbmU7c3Ryb2tlLXdpZHRoOjFweDtzdHJva2UtbGluZWNhcDpidXR0O3N0cm9rZS1saW5lam9pbjptaXRlcjtzdHJva2Utb3BhY2l0eToxIiBkPSJtIDEwOTQsMTY0My41IHYgMTQ2LjUzMTIgaCAyMy4yMjg1IHYgLTU2LjExNzEgaCAzMC41ODIgbCAyOS42MTE0LDU2LjExNzEgaCAyNy4wNDY5IGwgLTMyLjg4MDksLTU5LjI5ODggYyAwLDAgMjguNzI2NiwtOS45ODc1IDI4LjcyNjYsLTQ0LjEwNTQgMCwtMzUuODg1NyAtMzEuMjkwNSwtNDMuMTI3IC00MS40NTUxLC00My4xMjcgeiBtIDIzLjIyODUsMTkuMjYxNyBoIDMxLjc2ODYgYyAwLDAgMjYuNzUyOSwwIDI2Ljc1MjksMjYuMzYzMyAwLDI1IC0yMS44NzUsMjUuNSAtMjEuODc1LDI1LjUgaCAtMzYuNjQ2NSB6IiAvPjxwYXRoIHN0eWxlPSJkaXNwbGF5OmlubGluZTtmaWxsOiNmYzAxMmI7ZmlsbC1vcGFjaXR5OjE7c3Ryb2tlOm5vbmU7c3Ryb2tlLXdpZHRoOjFweDtzdHJva2UtbGluZWNhcDpidXR0O3N0cm9rZS1saW5lam9pbjptaXRlcjtzdHJva2Utb3BhY2l0eToxIiBkPSJtIDEyNjIuNTM5MSwxNjgwLjcwNTEgYyAtNDIuODY4NCwwIC00NC42NjQxLDM0LjY2OTkgLTQ0LjY2NDEsMzQuNjY5OSBoIDIxLjI1IGMgMCwwIDAuNDMzMywtMTUuODQzOCAyMS42NDY1LC0xNS44NDM4IDIxLjIxMzIsMWUtNCAyMS43Mjg1LDE1LjczMjUgMjEuNzI4NSwxNS43MzI1IGwgMC4zNzUsMTEuMjM2MyBjIDAsMCAtMTguMzc1LC0wLjc1IC0zNi4xMjUsMiAtMTcuNzUsMi43NSAtMzMuMDAyLDEyLjgzODggLTMzLjAwMiwzMS40MDA0IDAsMTguNTYxNSAxNC45Mzg2LDMyLjE3MzggMzYuOTQ3MywzMi4xNzM4IDIyLjAwODcsMCAzMi41Mjc0LC0xOS4wOTE4IDMyLjUyNzQsLTE5LjA5MTggdiAxNy4wNDg4IGggMjEuOTE5OSB2IC02Ny4yNTM5IGMgMCwtNy4zMzYzIDAuMjY0OCwtNDIuMDcyMiAtNDIuNjAzNSwtNDIuMDcyMiB6IE0gMTI4Mi41LDE3NDIuMjUgYyAzLjQ0NzEsMjguNTc2MyAtMTguMzkyLDMxLjYyNSAtMjYuNjg3NSwzMS42MjUgLTcuNSwwIC0xOS41NjI1LC0yLjY4NzUgLTE5LjU2MjUsLTEzLjg3NSAwLC0xMS4xODc1IDguNjI1LC0xMy45Mzc1IDE0LC0xNS42MjUgNS4zNzUsLTEuNjg3NSAzMi4yNSwtMi4xMjUgMzIuMjUsLTIuMTI1IHoiIC8+PHBhdGggc3R5bGU9ImRpc3BsYXk6aW5saW5lO2ZpbGw6I2ZiMDAyODtmaWxsLW9wYWNpdHk6MTtzdHJva2U6bm9uZTtzdHJva2Utd2lkdGg6MXB4O3N0cm9rZS1saW5lY2FwOmJ1dHQ7c3Ryb2tlLWxpbmVqb2luOm1pdGVyO3N0cm9rZS1vcGFjaXR5OjEiIGQ9Im0gMTM5OC43NSwxNjQzLjUgYyAwLDAgLTAuMTg3NSwzNS42MjUgLTAuMTg3NSw1Ny4zMTI1IC00LjMxMjUsLTguMTI1IC0xNC40Mzc1LC0xOS4zNzUgLTM0LjMxMjUsLTE5LjM3NSAtMTkuODc1LDAgLTQ0LjEyNSwxNi4wNjI1IC00NC4xMjUsNTQuODEyNSAwLDM4Ljc1IDIzLjYyNSw1NiA0NS43NSw1NiAyMi4xMjUsMCAzMy45NzQ2LC0yMC4wMTk1IDMzLjk3NDYsLTIwLjAxOTUgdiAxNy44MDA3IEggMTQyMS4yNSBWIDE2NDMuNSBaIG0gLTI4LjIwMTIsNTYuNTYwNSBjIDI2Ljg3MDEsMCAyOC4xMDc0LDI4LjYzODEgMjguMTA3NCwzNC42NDg1IDAsNi4wMTA0IDAuODg1OCwzNy44MzAxIC0yNy4wNDQ5LDM3LjgzMDEgLTI3LjkzMDcsMCAtMjguNDYyOSwtMjkuMTY4MSAtMjguNDYyOSwtMzcuMTIzMSAwLDAgMC41MzA0LC0zNS4zNTU1IDI3LjQwMDQsLTM1LjM1NTUgeiIgLz48cmVjdCBzdHlsZT0iZGlzcGxheTppbmxpbmU7ZmlsbDojZmIwMDI4O2ZpbGwtb3BhY2l0eToxO3N0cm9rZTpub25lIiB3aWR0aD0iMjEuNSIgaGVpZ2h0PSIxMDcuMTE3MTIiIHg9IjE0NDQuMTg4NiIgeT0iMTY4Mi45MTQyIiAvPjxjaXJjbGUgc3R5bGU9ImRpc3BsYXk6aW5saW5lO2ZpbGw6I2ZiMDAyODtmaWxsLW9wYWNpdHk6MTtzdHJva2U6bm9uZSIgY3g9IjE0NTQuNjg4NiIgY3k9IjE2NTQuNzUiIHI9IjEzLjI1IiAvPjxwYXRoIHN0eWxlPSJkaXNwbGF5OmlubGluZTtmaWxsOiNmYTAwMjg7ZmlsbC1vcGFjaXR5OjE7c3Ryb2tlOm5vbmU7c3Ryb2tlLXdpZHRoOjFweDtzdHJva2UtbGluZWNhcDpidXR0O3N0cm9rZS1saW5lam9pbjptaXRlcjtzdHJva2Utb3BhY2l0eToxIiBkPSJtIDE1MzQuMjc5MywxNjgwLjk4NDQgYyAtMC4zNjgzLDAuMDEgLTAuNTY0NSwwLjAxNiAtMC41NjQ1LDAuMDE2IDAsMCAtNTEuMjE0OCwtMS42NDI5IC01MS4yMTQ4LDU2LjM2MTMgMCw1Ni42MjkyIDUxLjIxNDgsNTQuNjM4NyA1MS4yMTQ4LDU0LjYzODcgMCwwIDUwLjI4NTIsMi4wNTQ4IDUwLjI4NTIsLTU0LjYzODcgMCwtNTUuMzc2OCAtNDQuMTk2MiwtNTYuNDU4IC00OS43MjA3LC01Ni4zNzY5IHogbSAtMS43OTMsMTkuMTI4OSBjIDAuNzgxOCwtMC4wMjEgMS4yMjg1LDAuMDEyIDEuMjI4NSwwLjAxMiA2LjMxMjIsMCAyNy4yMjI3LDEuMDQ0NCAyNy4yMjI3LDM3LjIzNjMgMCwzNy45Mzg0IC0yNC42ODczLDM2LjUxMzcgLTI3LjIyMjcsMzYuNTEzNyAtMi41MzU0LDAgLTI4LjU4OTgsMS4xMjUxIC0yOC41ODk4LC0zNi41MTM3IDAsLTM0LjM2MjggMjEuODg5MSwtMzcuMTAwNyAyNy4zNjEzLC0zNy4yNDggeiIgLz48cmVjdCBzdHlsZT0iZGlzcGxheTppbmxpbmU7ZmlsbDojNGE0YTRhO2ZpbGwtb3BhY2l0eToxO3N0cm9rZTpub25lIiB3aWR0aD0iMjEuNSIgaGVpZ2h0PSIxMDcuMTE3MTIiIHg9IjkxNCIgeT0iMTY4Mi45MTQyIiAvPjxjaXJjbGUgc3R5bGU9ImRpc3BsYXk6aW5saW5lO2ZpbGw6IzRhNGE0YTtmaWxsLW9wYWNpdHk6MTtzdHJva2U6bm9uZSIgY3g9IjkyNC41IiBjeT0iMTY1NC43NSIgcj0iMTMuMjUiIC8+PC9nPjwvc3ZnPg==",url:"https://itsliveradio.apple.com/3p-tune-in/tune_in/978194965/index-cmaf.m3u8?accessKey=1792804849_94CE003304E070809503_0oOqpbj5bT45j1e4p52H9cqQ1Az3j47oYExByaGPzjLSdbPM%2BikOU0Nr3RCVkRpikbYvqBj%2B4f9sOuRTOhvQD7lhroQ5MXe60aXTFLJzE0U%3D",type:'hls'},
-{id:'capital',cc:'GB',name:"Capital",sub:"95.8 FM · Лондон",genre:'Поп',c:['#FF2D55','#7A3CFF'],logo:"https://www.capitalfm.com/assets_v4r/capital/img/favicon-196x196.png",url:"https://media-ssl.musicradio.com/CapitalUKMP3"},
-{id:'heart',cc:'GB',name:"Heart UK",sub:"Feel Good · 106.2 FM",genre:'Поп',c:['#FF375F','#BF5AF2'],logo:LG.heart,url:"https://media-ssl.musicradio.com/HeartUKMP3"},
-{id:'radiox',cc:'GB',name:"Radio X",sub:"Инди и рок · 104.9 FM",genre:'Рок',c:['#FFB800','#FF5E3A'],logo:F('radiox.co.uk/'),url:"https://media-ssl.musicradio.com/RadioXUKMP3"},
+{id:'am1',cc:'US',name:"Apple Music 1",sub:"Apple Music · Прямой эфир из Лос-Анджелеса",genre:'Поп',c:['#FA233B','#FA0028'],logo:"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1960 1960'%3E%3Cpath fill='%23fff' d='M0 0h1960v1960H0z'/%3E%3Cg style='display:inline'%3E%3Cpath d='M854.3 989.8c0-198.4-.5-360.7-1-360.7s-24.2 14.2-59.8 31.5-85 39.6-107 50.7l-44.3 19.3V479.3c89.1-46.2 172.7-91.6 262.2-137h238.8v1008H854.3Z' style='display:inline;fill:%23fa0028;fill-opacity:1;stroke-width:2.82843'/%3E%3Cpath d='M472 1632s-31.4.9-31.8 37c0 0 30.5 1.5 31.8-37' style='fill:%234a4a4a;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1'/%3E%3Cpath d='M440.8 1666.6c.2-3.4.8-7.3 1.7-10.4q1.7-6 5.4-11c1.2-1.7 4.2-4.7 5.9-6a35 35 0 0 1 16.7-6.6h1l-.1 1.2q-1 14.3-7.2 22.7a30 30 0 0 1-22.6 11.9h-.8z' style='fill:%234a4a4a;fill-opacity:1;stroke-width:.125'/%3E%3Cpath d='M500.8 1686.3s-19.9 11.9-17.2 33.5c1.2 9.9 5.1 18.6 21.1 29-17.2 48.2-36.9 43-39.7 42.2-9.3-2.6-20.1-11.5-42.1-.2-26.6 7.5-45-51.9-46.2-64.4-4.4-48.5 30.6-54.3 35.7-55 3.3-.5 15.4.8 21.6 4.6 10.4 4.6 10 1.6 17-.9 35.5-15 49.8 11.2 49.8 11.2m29.5 103.7v-146.5h26.5l47.7 116.7 47.6-116.7h26.3V1790h-20.8v-108.2L613 1790h-16.8l-44.8-108.6V1790zm171.1-107 .4 74.7s-2.4 34.3 36.8 34.3c27.4-.1 33-20.7 33-20.7v18.7h21v-107h-21.7l-.3 67.9s-1.6 22-24 22c-24 0-22.8-15.6-22.8-15.6l.1-74.4zm172.6 31.8h20c0-29-30.3-34-42-34-35 0-40 22.3-40 33.6s5.3 25.7 40 31.5c24.5 4.4 22.3 12.4 22.3 14.6s1 14.3-19.8 14.3c-24.3 0-23.4-15.7-23.4-15.7h-22.3s1.8 32.7 44.8 32.7 43.2-31.4 43.2-31.4 5.3-24.4-31.2-30.4c-18.3-3-26.8-7-29.8-11.3-5.6-8 0-14.7 0-14.7s4.3-9 22.5-5.5c9.6 1.8 13.5 6.2 15.7 16.3' style='display:inline;fill:%234a4a4a;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1'/%3E%3Cpath d='M1027.8 1719.7s-2.7-20-25.5-20-26.8 23.7-26.8 36.8 2.6 36.4 26.3 36.4 25.4-19 25.4-19h21.8s-3 38.2-45.9 38.2-50.4-35.8-50.4-58.2 12.5-52.9 48.7-52.9c36.1 0 47.7 26.6 47.7 38.6z' style='fill:%234a4a4a;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1'/%3E%3Cpath d='M1094 1643.5V1790h23.2v-56h30.6l29.6 56h27l-32.8-59.3s28.7-10 28.7-44c0-36-31.3-43.2-41.4-43.2zm23.2 19.3h31.8s26.8 0 26.8 26.3c0 25-22 25.5-22 25.5h-36.6z' style='fill:%23fa0028;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1'/%3E%3Cpath d='M1262.5 1680.7c-42.8 0-44.6 34.7-44.6 34.7h21.2s.5-15.9 21.7-15.9 21.7 15.8 21.7 15.8l.4 11.2s-18.4-.7-36.2 2c-17.7 2.8-33 12.8-33 31.4s15 32.2 37 32.2 32.5-19.1 32.5-19.1v17h22v-67.2c0-7.4.2-42-42.7-42m20 61.5c3.4 28.6-18.4 31.7-26.7 31.7-7.5 0-19.5-2.7-19.5-13.9s8.6-14 14-15.6c5.3-1.7 32.2-2.2 32.2-2.2' style='display:inline;fill:%23fc012b;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1'/%3E%3Cpath d='m1398.8 1643.5-.2 57.3a37 37 0 0 0-34.3-19.4c-20 0-44.2 16.1-44.2 54.8 0 38.8 23.7 56 45.8 56s34-20 34-20v17.8h21.3v-146.5Zm-28.3 56.6c27 0 28.2 28.6 28.2 34.6s.8 37.8-27 37.8c-28 0-28.6-29.1-28.6-37 0 0 .6-35.4 27.4-35.4' style='display:inline;fill:%23fb0028;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1'/%3E%3Cpath d='M1444.2 1682.9h21.5V1790h-21.5z' style='display:inline;fill:%23fb0028;fill-opacity:1;stroke:none'/%3E%3Ccircle cx='1454.7' cy='1654.8' r='13.3' style='display:inline;fill:%23fb0028;fill-opacity:1;stroke:none'/%3E%3Cpath d='M1534.3 1681h-.6s-51.2-1.6-51.2 56.4c0 56.6 51.2 54.6 51.2 54.6s50.3 2 50.3-54.6c0-55.4-44.2-56.5-49.7-56.4m-1.8 19.1h1.2c6.3 0 27.2 1 27.2 37.3 0 37.9-24.6 36.5-27.2 36.5s-28.6 1.1-28.6-36.5c0-34.4 22-37.1 27.4-37.3' style='display:inline;fill:%23fa0028;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1'/%3E%3Cpath d='M914 1682.9h21.5V1790H914z' style='display:inline;fill:%234a4a4a;fill-opacity:1;stroke:none'/%3E%3Ccircle cx='924.5' cy='1654.8' r='13.3' style='display:inline;fill:%234a4a4a;fill-opacity:1;stroke:none'/%3E%3C/g%3E%3C/svg%3E",url:"https://itsliveradio.apple.com/3p-tune-in/tune_in/978194965/index-cmaf.m3u8?accessKey=1792804849_94CE003304E070809503_0oOqpbj5bT45j1e4p52H9cqQ1Az3j47oYExByaGPzjLSdbPM%2BikOU0Nr3RCVkRpikbYvqBj%2B4f9sOuRTOhvQD7lhroQ5MXe60aXTFLJzE0U%3D",type:'hls'},
+{id:'capital',cc:'GB',name:"Capital",sub:"95.8 FM · Лондон",genre:'Поп',c:['#FF2D55','#7A3CFF'],logo:"https://www.capitalfm.com/assets_v4r/capital/img/favicon-196x196.png",url:U[4]+"CapitalUKMP3"},
+{id:'heart',cc:'GB',name:"Heart UK",sub:"Feel Good · 106.2 FM",genre:'Поп',c:['#FF375F','#BF5AF2'],logo:LG.heart,url:U[4]+"HeartUKMP3"},
+{id:'radiox',cc:'GB',name:"Radio X",sub:"Инди и рок · 104.9 FM",genre:'Рок',c:['#FFB800','#FF5E3A'],logo:F('radiox.co.uk/'),url:U[4]+"RadioXUKMP3"},
 {id:'absolute',cc:'GB',name:"Absolute Radio",sub:"Rock · 105.8 FM",genre:'Рок',c:['#EC1A2E','#5E2129'],logo:LG.absoluteradio,url:"https://stream-ar.hellorayo.co.uk/absoluteradiohigh.aac?aw_0_1st.skey=1602676850&direct=true&rp_source=1"},
 {id:'absolute80s',cc:'GB',name:"Absolute 80s",sub:"Хиты 80-х",genre:'Ретро',c:['#FF2D55','#5E5CE6'],logo:LG.absoluteradio,url:"https://stream-ar.hellorayo.co.uk/absolute80shigh.aac?aw_0_1st.skey=1602676850&direct=true&rp_source=1"},
 {id:'virgin',cc:'GB',name:"Virgin Radio",sub:"Rock · Лондон",genre:'Рок',c:['#FF375F','#8B0F1E'],logo:LG.celsoazevedo,url:"https://radio.virginradio.co.uk/stream"},
 {id:'capitaldance',cc:'GB',name:"Capital Dance",sub:"Dance · Лондон",genre:'Танцевальная',c:['#00E676','#00B0FF'],logo:"https://www.capitaldance.com/assets_v4r/capitaldance/img/favicon-196x196.png",url:"https://icecast.thisisdax.com/CapitalDanceMP3"},
-{id:'heartdance',cc:'GB',name:"Heart Dance",sub:"Dance · Нон-стоп",genre:'Танцевальная',c:['#BF5AF2','#FF375F'],logo:LG.heart,url:"https://media-ssl.musicradio.com/HeartDanceMP3"},
+{id:'heartdance',cc:'GB',name:"Heart Dance",sub:"Dance · Нон-стоп",genre:'Танцевальная',c:['#BF5AF2','#FF375F'],logo:LG.heart,url:U[4]+"HeartDanceMP3"},
 {id:'xtra',cc:'GB',name:"Capital XTRA",sub:"Hip-Hop · Грайм",genre:'Хип-хоп',c:['#30D158','#0A84FF'],logo:F('capitalxtra.com/'),url:"https://media-the.musicradio.com/CapitalXTRALondonMP3"},
-{id:'smooth',cc:'GB',name:"Smooth Radio",sub:"Спокойные хиты · 102.2 FM",genre:'Поп',c:['#5AC8FA','#0A84FF'],logo:LG.smoothradio,url:"https://media-ssl.musicradio.com/SmoothUKMP3"},
-{id:'smoothchill',cc:'GB',name:"Smooth Chill",sub:"Чилл · Релакс",genre:'Чилл',c:['#64D2FF','#5E5CE6'],logo:LG.smoothradio,url:"https://media-ssl.musicradio.com/ChillMP3"},
-{id:'heart80s',cc:'GB',name:"Heart 80s",sub:"Хиты 80-х",genre:'Ретро',c:['#FF9F0A','#FF375F'],logo:LG.heart,url:"https://media-ssl.musicradio.com/Heart80sMP3"},
-{id:'heart90s',cc:'GB',name:"Heart 90s",sub:"Хиты 90-х",genre:'Ретро',c:['#5E5CE6','#FF2D92'],logo:LG.heart,url:"https://media-ssl.musicradio.com/Heart90sMP3"},
-{id:'gold',cc:'GB',name:"Gold Radio",sub:"Золото 60–80-х · 1548 AM",genre:'Ретро',c:['#FFD60A','#FF9F0A'],logo:"https://www.mygoldmusic.co.uk/assets_v4r/gold/img/favicon-196x196.png",url:"https://media-ssl.musicradio.com/GoldMP3"},
+{id:'smooth',cc:'GB',name:"Smooth Radio",sub:"Спокойные хиты · 102.2 FM",genre:'Поп',c:['#5AC8FA','#0A84FF'],logo:LG.smoothradio,url:U[4]+"SmoothUKMP3"},
+{id:'smoothchill',cc:'GB',name:"Smooth Chill",sub:"Чилл · Релакс",genre:'Чилл',c:['#64D2FF','#5E5CE6'],logo:LG.smoothradio,url:U[4]+"ChillMP3"},
+{id:'heart80s',cc:'GB',name:"Heart 80s",sub:"Хиты 80-х",genre:'Ретро',c:['#FF9F0A','#FF375F'],logo:LG.heart,url:U[4]+"Heart80sMP3"},
+{id:'heart90s',cc:'GB',name:"Heart 90s",sub:"Хиты 90-х",genre:'Ретро',c:['#5E5CE6','#FF2D92'],logo:LG.heart,url:U[4]+"Heart90sMP3"},
+{id:'gold',cc:'GB',name:"Gold Radio",sub:"Золото 60–80-х · 1548 AM",genre:'Ретро',c:['#FFD60A','#FF9F0A'],logo:"https://www.mygoldmusic.co.uk/assets_v4r/gold/img/favicon-196x196.png",url:U[4]+"GoldMP3"},
 {id:'magic',cc:'GB',name:"Magic Radio",sub:"Soul · 105.4 FM",genre:'Ретро',c:['#BF5AF2','#FF2D92'],logo:F('magicradio.com/'),url:"https://stream-mz.hellorayo.co.uk/magicnational.mp3?direct=true&aw_0_1st.playerid=BMUK_TuneIn&aw_0_1st.skey=7374499933&stationCode=mag"},
-{id:'classicfm',cc:'GB',name:"Classic FM",sub:"Классика · 100–102 FM",genre:'Классика',c:['#FFD60A','#1D3A6E'],logo:LG.classicfm,url:"https://media-ssl.musicradio.com/ClassicFMMP3"},
-{id:'lbc',cc:'GB',name:"LBC",sub:"Новости · 97.3 FM",genre:'Новости',c:['#FF453A','#7A1A1A'],logo:F('lbc.co.uk/'),url:"https://media-ssl.musicradio.com/LBCUK"},
+{id:'classicfm',cc:'GB',name:"Classic FM",sub:"Классика · 100–102 FM",genre:'Классика',c:['#FFD60A','#1D3A6E'],logo:LG.classicfm,url:U[4]+"ClassicFMMP3"},
+{id:'lbc',cc:'GB',name:"LBC",sub:"Новости · 97.3 FM",genre:'Новости',c:['#FF453A','#7A1A1A'],logo:F('lbc.co.uk/'),url:U[4]+"LBCUK"},
 {id:'talksport',cc:'GB',name:"talkSPORT",sub:"Спорт · 1089 AM",genre:'Спорт',c:['#30D158','#0A3D1E'],logo:F('radio.talksport.com/stream'),url:"https://radio.talksport.com/stream"},
-{id:'bbc1',cc:'GB',name:"BBC Radio 1",sub:"Новая музыка · 98–100 FM",genre:'Поп',c:['#FA233B','#FB5C74'],logo:LG.bbc,url:"https://as-hls-ww-live.akamaized.net/pool_01505109/live/ww/bbc_radio_one/bbc_radio_one.isml/bbc_radio_one-audio%3d96000.norewind.m3u8",type:'hls'},
-{id:'bbc1xtra',cc:'GB',name:"BBC 1Xtra",sub:"Хип-хоп · R&B",genre:'Хип-хоп',c:['#FF6A00','#FA233B'],logo:LG.bbc,url:"https://as-hls-ww-live.akamaized.net/pool_92079267/live/ww/bbc_1xtra/bbc_1xtra.isml/bbc_1xtra-audio%3d96000.norewind.m3u8",type:'hls'},
-{id:'bbc2',cc:'GB',name:"BBC Radio 2",sub:"Хиты для всех · 88–91 FM",genre:'Поп',c:['#0A84FF','#5E5CE6'],logo:LG.bbc,url:"https://as-hls-ww-live.akamaized.net/pool_74208725/live/ww/bbc_radio_two/bbc_radio_two.isml/bbc_radio_two-audio%3d96000.norewind.m3u8",type:'hls'},
-{id:'bbc3',cc:'GB',name:"BBC Radio 3",sub:"Классика · 90–93 FM",genre:'Классика',c:['#5E5CE6','#BF5AF2'],logo:LG.bbc,url:"https://as-hls-ww-live.akamaized.net/pool_23461179/live/ww/bbc_radio_three/bbc_radio_three.isml/bbc_radio_three-audio%3d96000.norewind.m3u8",type:'hls'},
-{id:'bbc4',cc:'GB',name:"BBC Radio 4",sub:"Драмы и культура · 92–95 FM",genre:'Новости',c:['#C43E3E','#5E2A2A'],logo:LG.bbc,url:"https://as-hls-ww-live.akamaized.net/pool_55057080/live/ww/bbc_radio_fourfm/bbc_radio_fourfm.isml/bbc_radio_fourfm-audio%3d96000.norewind.m3u8",type:'hls'},
-{id:'bbc5',cc:'GB',name:"BBC Radio 5 Live",sub:"Спорт и новости · 909 AM",genre:'Спорт',c:['#FFD60A','#C43E3E'],logo:LG.bbc,url:"https://as-hls-ww-live.akamaized.net/pool_89021708/live/ww/bbc_radio_five_live/bbc_radio_five_live.isml/bbc_radio_five_live-audio%3d96000.norewind.m3u8",type:'hls'},
-{id:'bbc6',cc:'GB',name:"BBC 6 Music",sub:"Альтернатива · DAB",genre:'Рок',c:['#00C7BE','#0A84FF'],logo:LG.bbc,url:"https://as-hls-ww-live.akamaized.net/pool_81827798/live/ww/bbc_6music/bbc_6music.isml/bbc_6music-audio%3d96000.norewind.m3u8",type:'hls'},
-{id:'bbcws',cc:'GB',name:"BBC World Service",sub:"Мировые новости",genre:'Новости',c:['#8E8E93','#48484A'],logo:LG.bbc,url:"https://as-hls-ww-live.akamaized.net/pool_87948813/live/ww/bbc_world_service/bbc_world_service.isml/bbc_world_service-audio%3d96000.norewind.m3u8",type:'hls'},
-{id:'gb27',cc:'GB',name:"Heart 70s",sub:"Хиты 70-х · Global",genre:'Ретро',c:['#5E5CE6','#FF2D92'],logo:LG.heart,url:"https://media-ssl.musicradio.com/Heart70sMP3"},
-{id:'gb28',cc:'GB',name:"LBC News",sub:"Новости · Лондон",genre:'Новости',c:['#DA4453','#89216B'],logo:"https://herald.musicradio.com/media/02a3caa1-dacf-47b1-ad54-c10728b66cd9.png",url:"https://media-ssl.musicradio.com/LBCNewsUK"},
+{id:'bbc1',cc:'GB',name:"BBC Radio 1",sub:"Новая музыка · 98–100 FM",genre:'Поп',c:['#FA233B','#FB5C74'],logo:LG.bbc,url:U[3]+"pool_01505109/live/ww/bbc_radio_one/bbc_radio_one.isml/bbc_radio_one-audio%3d96000.norewind.m3u8",type:'hls'},
+{id:'bbc1xtra',cc:'GB',name:"BBC 1Xtra",sub:"Хип-хоп · R&B",genre:'Хип-хоп',c:['#FF6A00','#FA233B'],logo:LG.bbc,url:U[3]+"pool_92079267/live/ww/bbc_1xtra/bbc_1xtra.isml/bbc_1xtra-audio%3d96000.norewind.m3u8",type:'hls'},
+{id:'bbc2',cc:'GB',name:"BBC Radio 2",sub:"Хиты для всех · 88–91 FM",genre:'Поп',c:['#0A84FF','#5E5CE6'],logo:LG.bbc,url:U[3]+"pool_74208725/live/ww/bbc_radio_two/bbc_radio_two.isml/bbc_radio_two-audio%3d96000.norewind.m3u8",type:'hls'},
+{id:'bbc3',cc:'GB',name:"BBC Radio 3",sub:"Классика · 90–93 FM",genre:'Классика',c:['#5E5CE6','#BF5AF2'],logo:LG.bbc,url:U[3]+"pool_23461179/live/ww/bbc_radio_three/bbc_radio_three.isml/bbc_radio_three-audio%3d96000.norewind.m3u8",type:'hls'},
+{id:'bbc4',cc:'GB',name:"BBC Radio 4",sub:"Драмы и культура · 92–95 FM",genre:'Новости',c:['#C43E3E','#5E2A2A'],logo:LG.bbc,url:U[3]+"pool_55057080/live/ww/bbc_radio_fourfm/bbc_radio_fourfm.isml/bbc_radio_fourfm-audio%3d96000.norewind.m3u8",type:'hls'},
+{id:'bbc5',cc:'GB',name:"BBC Radio 5 Live",sub:"Спорт и новости · 909 AM",genre:'Спорт',c:['#FFD60A','#C43E3E'],logo:LG.bbc,url:U[3]+"pool_89021708/live/ww/bbc_radio_five_live/bbc_radio_five_live.isml/bbc_radio_five_live-audio%3d96000.norewind.m3u8",type:'hls'},
+{id:'bbc6',cc:'GB',name:"BBC 6 Music",sub:"Альтернатива · DAB",genre:'Рок',c:['#00C7BE','#0A84FF'],logo:LG.bbc,url:U[3]+"pool_81827798/live/ww/bbc_6music/bbc_6music.isml/bbc_6music-audio%3d96000.norewind.m3u8",type:'hls'},
+{id:'bbcws',cc:'GB',name:"BBC World Service",sub:"Мировые новости",genre:'Новости',c:['#8E8E93','#48484A'],logo:LG.bbc,url:U[3]+"pool_87948813/live/ww/bbc_world_service/bbc_world_service.isml/bbc_world_service-audio%3d96000.norewind.m3u8",type:'hls'},
+{id:'gb27',cc:'GB',name:"Heart 70s",sub:"Хиты 70-х · Global",genre:'Ретро',c:['#5E5CE6','#FF2D92'],logo:LG.heart,url:U[4]+"Heart70sMP3"},
+{id:'gb28',cc:'GB',name:"LBC News",sub:"Новости · Лондон",genre:'Новости',c:['#DA4453','#89216B'],logo:"https://herald.musicradio.com/media/02a3caa1-dacf-47b1-ad54-c10728b66cd9.png",url:U[4]+"LBCNewsUK"},
 {id:'gb29',cc:'GB',name:"Radio X Classic Rock",sub:"Классик-рок · Global",genre:'Рок',c:['#5E5CE6','#FF2D92'],logo:LG.radiox,url:"https://media-ice.musicradio.com/RadioXClassicRockMP3"},
 {id:'gb30',cc:'GB',name:"Boom Radio",sub:"Золото 60-х · Лондон",genre:'Ретро',c:['#64D2FF','#5E5CE6'],url:"https://listen-boomradio.sharp-stream.com/65_boom_radio_live_128"},
 {id:'gb31',cc:'GB',name:"Classic FM Calm",sub:"Спокойная классика",genre:'Классика',c:['#F76B1C','#FDA085'],logo:LG.classicfm,url:"https://media-ice.musicradio.com/ClassicFMCalmMP3"},
@@ -1131,9 +1194,9 @@ const STATIONS=[
 {id:'us30',cc:'US',name:"NPR News",sub:"24/7 новости · США",genre:'Новости',c:['#12C2E9','#C471ED'],logo:"https://npr.org/favicon.ico",url:"https://npr-ice.streamguys1.com/live.mp3"},
 {id:'ca1',cc:'CA',name:"CBC Radio One Toronto",genre:'Новости',c:['#DA4453','#89216B'],logo:"https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Ftse1.mm.bing.net%2Fth%3Fid%3DOIP._kBBu0jkxW7vsBMbUIlxpwHaJA%26pid%3DApi&f=1",url:"https://cbcradiolive.akamaized.net/hls/live/2041036/ES_R1ETR/master.m3u8",type:'hls'},
 {id:'ca2',cc:'CA',name:"ICI Radio-Canada Première",genre:'Новости',c:['#FFD60A','#1D3A6E'],url:"https://rcavliveaudio.akamaized.net/hls/live/2006635/P-2QMTL0_MTL/playlist.m3u8",type:'hls'},
-{id:'ca3',cc:'CA',name:"680 News Toronto",genre:'Новости',c:['#64D2FF','#5E5CE6'],logo:"https://680news.com/apple-touch-icon.png",url:"https://rogers-hls.leanstream.co/rogers/tor680.stream/playlist.m3u8",type:'hls'},
+{id:'ca3',cc:'CA',name:"680 News Toronto",genre:'Новости',c:['#64D2FF','#5E5CE6'],logo:"https://680news.com/apple-touch-icon.png",url:U[2]+"tor680.stream/playlist.m3u8",type:'hls'},
 {id:'ca4',cc:'CA',name:"640 Global News Toronto",genre:'Новости',c:['#00E676','#00B0FF'],logo:"https://globalnews.ca/wp-content/themes/shaw-globalnews/assets/dist/images/logo-morty.svg",url:"https://corus.leanstream.co/CFIQAM-MP3"},
-{id:'ca5',cc:'CA',name:"Sportsnet 590 The Fan",genre:'Спорт',c:['#DA4453','#89216B'],logo:"https://www.sportsnet.ca/wp-content/themes/sportsnet-nhl/images/sn_logo_120x120_bg_white.png",url:"https://rogers-hls.leanstream.co/rogers/tor590.stream/playlist.m3u8",type:'hls'},
+{id:'ca5',cc:'CA',name:"Sportsnet 590 The Fan",genre:'Спорт',c:['#DA4453','#89216B'],logo:"https://www.sportsnet.ca/wp-content/themes/sportsnet-nhl/images/sn_logo_120x120_bg_white.png",url:U[2]+"tor590.stream/playlist.m3u8",type:'hls'},
 {id:'ca6',cc:'CA',name:"Indie88 Toronto",genre:'Рок',c:['#F953C6','#B91D73'],logo:F('indie88.com/'),url:"https://localradio.streamb.live/SB00348"},
 {id:'ca7',cc:'CA',name:"加拿大中文电台 FM96.1",genre:'Поп',c:['#F76B1C','#FDA085'],url:"https://5b2959fe11444.streamlock.net/radio/fm961.stream/playlist.m3u8",type:'hls'},
 {id:'ca8',cc:'CA',name:"Reggae Chill Cafe",genre:'Чилл',c:['#FFB800','#FF5E3A'],url:"https://maggie.torontocast.com:2020/stream/reggaechillcafe"},
@@ -1150,7 +1213,7 @@ const STATIONS=[
 {id:'ca19',cc:'CA',name:"Suite Jazz Radio",genre:'Джаз',c:['#F76B1C','#FDA085'],url:"https://jenny.torontocast.com:2000/stream/suitejazzradio"},
 {id:'ca20',cc:'CA',name:"Smooth Jazz Deluxe",genre:'Джаз',c:['#FF6A00','#FA233B'],url:"https://cast1.torontocast.com:4490/;?type=http&nocache=1745925758"},
 {id:'ca21',cc:'CA',name:"Choice Classic Rock",genre:'Рок',c:['#F76B1C','#FDA085'],logo:F('www.choiceclassicrock.com/'),url:"https://streamer.radio.co/s66f2626b4/listen"},
-{id:'ca22',cc:'CA',name:"100 Best Ibiza Deep House",genre:'Танцевальная',c:['#FFB800','#FF5E3A'],logo:"https://static.wixstatic.com/media/f361b3_cf8747dc2b804de09c56359c324dd1f5~mv2.jpg",url:"https://stream.zeno.fm/lwv6zqgtv1dtv"},
+{id:'ca22',cc:'CA',name:"100 Best Ibiza Deep House",genre:'Танцевальная',c:['#FFB800','#FF5E3A'],logo:"https://static.wixstatic.com/media/f361b3_cf8747dc2b804de09c56359c324dd1f5~mv2.jpg",url:U[6]+"lwv6zqgtv1dtv"},
 {id:'ca23',cc:'CA',name:"DKFM Shoegaze",genre:'Рок',c:['#BF5AF2','#FF2D92'],logo:LG.wp,url:"https://kathy.torontocast.com:2005/stream"},
 {id:'ca24',cc:'CA',name:"Airport Lounge Radio",genre:'Чилл',c:['#F76B1C','#FDA085'],url:"https://az1.mediacp.eu/listen/airport-lounge-radio/radio.mp3"},
 {id:'ca25',cc:'CA',name:"RdMix 70s 80s 90s",genre:'Ретро',c:['#12C2E9','#C471ED'],logo:"https://radiodimensionemix.torontocast.stream/wp-content/uploads/2020/02/cropped-RDMIX_NET_2020.jpg",url:"https://cast1.torontocast.com:1830/stream"},
@@ -1167,7 +1230,7 @@ const STATIONS=[
 {id:'ie6',cc:'IE',name:"Newstalk",genre:'Новости',c:['#11998E','#38EF7D'],logo:F('newstalk.com/'),url:"https://edge.audioxi.com/NT"},
 {id:'ie7',cc:'IE',name:"Today FM",genre:'Новости',c:['#FF6A00','#FA233B'],logo:LG.r98fm,url:"https://stream.audioxi.com/TD"},
 {id:'ie8',cc:'IE',name:"8Radio",genre:'Рок',c:['#FFD60A','#1D3A6E'],logo:F('8radio.com/'),url:"https://edge4.audioxi.com/8RADIO"},
-{id:'ie9',cc:'IE',name:"Highland Radio",genre:'Поп',c:['#8A3BE8','#E01B6A'],logo:"https://highlandradio.com/wp-content/uploads/2022/01/cropped-highland-favicon-01-180x180.png",url:"https://playerservices.streamtheworld.com/api/livestream-redirect/HIGHLAND_RADIO.mp3"},
+{id:'ie9',cc:'IE',name:"Highland Radio",genre:'Поп',c:['#8A3BE8','#E01B6A'],logo:"https://highlandradio.com/wp-content/uploads/2022/01/cropped-highland-favicon-01-180x180.png",url:U[0]+"HIGHLAND_RADIO.mp3"},
 {id:'ie10',cc:'IE',name:"Dublin's 98FM",genre:'Поп',c:['#FFB800','#FF5E3A'],logo:LG.r98fm,url:"https://stream.audioxi.com/98"},
 {id:'ie11',cc:'IE',name:"Dublin's FM104",genre:'Поп',c:['#FFB800','#FF5E3A'],logo:"https://mm.aiircdn.com/620/5d9f214ccc05f.png",url:"https://wg.cdn.tibus.net/fm104MP3128"},
 {id:'ie12',cc:'IE',name:"Q102 Dublin",genre:'Поп',c:['#DA4453','#89216B'],url:"https://wg.cdn.tibus.net/q102MP3128"},
@@ -1216,7 +1279,7 @@ const STATIONS=[
 {id:'jp1',cc:'JP',name:"J-POP Powerplay",genre:'Поп',c:['#11998E','#38EF7D'],logo:"https://cdn-radiotime-logos.tunein.com/s260995g.png",url:"https://kathy.torontocast.com:3560/"},
 {id:'jp2',cc:'JP',name:"J-Rock Powerplay",genre:'Рок',c:['#FF375F','#BF5AF2'],url:"https://kathy.torontocast.com:3340/;?shoutcast"},
 {id:'jp3',cc:'JP',name:"J1 HITS",genre:'Поп',c:['#E5446D','#3A1C71'],logo:"https://mmo.aiircdn.com/387/5e763985f1dab.png",url:"https://jenny.torontocast.com:2000/stream/J1HITS?_=184325"},
-{id:'jp4',cc:'JP',name:"Anime Para Ti",genre:'Аниме',c:['#FF375F','#BF5AF2'],logo:"https://images.zeno.fm/TrBD3tEtOJbMAdKu3XR64pWUT2XTjBhzgn2n2w_lFnE/rs:fit:500:500/g:ce:0:0/aHR0cHM6Ly9zdHJlYW0tdG9vbHMuemVub21lZGlhLmNvbS9jb250ZW50L3N0YXRpb25zL2FneHpmbnBsYm04dGMzUmhkSE55TWdzU0NrRjFkR2hEYkdsbGJuUVlnSUNBeF92bDF3b01DeElPVTNSaGRHbHZibEJ5YjJacGJHVVlnSUNBZ0lEeWlBb01vZ0VFZW1WdWJ3L2ltYWdlLz9yZXNpemU9NTAweDUwMCZ1cGRhdGVkPTE2NjI3NzM0MjEwMDA.webp",url:"https://stream.zeno.fm/qpn8mkt8c4duv"},
+{id:'jp4',cc:'JP',name:"Anime Para Ti",genre:'Аниме',c:['#FF375F','#BF5AF2'],logo:"https://images.zeno.fm/TrBD3tEtOJbMAdKu3XR64pWUT2XTjBhzgn2n2w_lFnE/rs:fit:500:500/g:ce:0:0/aHR0cHM6Ly9zdHJlYW0tdG9vbHMuemVub21lZGlhLmNvbS9jb250ZW50L3N0YXRpb25zL2FneHpmbnBsYm04dGMzUmhkSE55TWdzU0NrRjFkR2hEYkdsbGJuUVlnSUNBeF92bDF3b01DeElPVTNSaGRHbHZibEJ5YjJacGJHVVlnSUNBZ0lEeWlBb01vZ0VFZW1WdWJ3L2ltYWdlLz9yZXNpemU9NTAweDUwMCZ1cGRhdGVkPTE2NjI3NzM0MjEwMDA.webp",url:U[6]+"qpn8mkt8c4duv"},
 {id:'jp5',cc:'JP',name:"Gensokyo Radio",genre:'Аниме',c:['#8A3BE8','#E01B6A'],url:"https://stream.gensokyoradio.net/3"},
 {id:'jp6',cc:'JP',name:"R/a/dio",genre:'Аниме',c:['#11998E','#38EF7D'],logo:F('r-a-d.io/'),url:"https://relay0.r-a-d.io/main.mp3"},
 {id:'jp7',cc:'JP',name:"Japan City Pop",genre:'Ретро',c:['#64D2FF','#5E5CE6'],url:"https://play.streamafrica.net/japancitypop"},
@@ -1228,7 +1291,7 @@ const STATIONS=[
 {id:'jp13',cc:'JP',name:"Ashiya Radio",genre:'Джаз',c:['#DA4453','#89216B'],logo:"https://static.wixstatic.com/media/da9e0b_7c54de8c1f934d67bdab3cec46be5c3e~mv2.png/v1/fill/w_1070,h_1080,al_c/da9e0b_7c54de8c1f934d67bdab3cec46be5c3e~mv2.png",url:"https://s3.radio.co/sc8d895604/listen"},
 {id:'jp14',cc:'JP',name:"NHK World Radio",genre:'Новости',c:['#DA4453','#89216B'],logo:LG.or,url:"https://master.nhkworld.jp/nhkworld-radio/playlist/rs5/live.m3u8",type:'hls'},
 {id:'jp15',cc:'JP',name:"Japan Hits · Asia DREAM",genre:'Поп',c:['#00C7BE','#0A84FF'],url:"https://quincy.torontocast.com:2020/stream.mp3"},
-{id:'jp16',cc:'JP',name:"大富ラジオ",genre:'Новости',c:['#64D2FF','#5E5CE6'],url:"https://stream.zeno.fm/oaxp6mswcqltv"},
+{id:'jp16',cc:'JP',name:"大富ラジオ",genre:'Новости',c:['#64D2FF','#5E5CE6'],url:U[6]+"oaxp6mswcqltv"},
 {id:'jp17',cc:'JP',name:"J-Club Powerplay Hip-Hop",genre:'Хип-хоп',c:['#00B4DB','#0083B0'],url:"https://kathy.torontocast.com:3350/;?shoutcast"},
 {id:'jp18',cc:'JP',name:"Gotanno FM 89.2",genre:'Поп',c:['#5E5CE6','#FF2D92'],logo:"https://yt3.googleusercontent.com/ytc/AIdro_mdnuovYgEJ9KclQYa5ECb4eR_94VbI-hNx4-Ml5YA7OQ=s900-c-k-c0x00ffffff-no-rj",url:"https://radio.gotanno.love/;"},
 {id:'jp19',cc:'JP',name:"Rainwave",genre:'Аниме',c:['#FA233B','#FB5C74'],logo:"https://rainwave.cc/static/images4/ios/1024.png",url:"https://relay.rainwave.cc/all.mp3?1:MF0d8GHw2d"},
@@ -1302,7 +1365,7 @@ const STATIONS=[
 {id:'us41',cc:'US',name:"SomaFM Secret Agent",sub:"Spy jazz · AAC 32 кбит/с",genre:'Джаз',c:['#FF2D55','#7A3CFF'],logo:LG.somafm,url:"https://ice6.somafm.com/secretagent-32-aac"},
 {id:'us42',cc:'US',name:"America's Country",genre:'Кантри',c:['#FF2D55','#7A3CFF'],logo:"https://americascountry.us/images/favicon.png",url:"https://ais-sa2.cdnstream1.com/1976_128.mp3"},
 {id:'us43',cc:'US',name:"102.7 KIIS FM",genre:'Поп',c:['#FFD60A','#1D3A6E'],logo:"https://i.iheart.com/v3/re/assets.brands/2ebe753539305728784b0f3b178eae45?ops=new(),flood(%22white%22),swap(),merge(%22over%22),gravity(%22center%22),contain(167,167),quality(80),format(%22png%22)",url:"https://stream.revma.ihrhls.com/zc185"},
-{id:'us44',cc:'US',name:"Bloomberg 99.1/105.7 HD2",genre:'Новости',c:['#64D2FF','#5E5CE6'],logo:"https://www.bloombergradio.com/content/plugins/bloomberg-favicon/dist/img/amber-120x120.png",url:"https://playerservices.streamtheworld.com/api/livestream-redirect/WBBRDCAAC.aac"},
+{id:'us44',cc:'US',name:"Bloomberg 99.1/105.7 HD2",genre:'Новости',c:['#64D2FF','#5E5CE6'],logo:"https://www.bloombergradio.com/content/plugins/bloomberg-favicon/dist/img/amber-120x120.png",url:U[0]+"WBBRDCAAC.aac"},
 {id:'us45',cc:'US',name:"Red State Talk Radio",genre:'Новости',c:['#5AC8FA','#0A84FF'],logo:"https://redstatetalkradio.com/wp-content/uploads/2021/03/cropped-rstr588x588-180x180.png",url:"https://s2.radio.co/s572ad25f7/listen"},
 {id:'us46',cc:'US',name:"CNN International Audio",genre:'Новости',c:['#11998E','#38EF7D'],logo:"https://raw.githubusercontent.com/AusIPTV/IPTVLogos/master/CNN_International_Logo.png",url:"https://tunein.cdnstream1.com/3519_96.aac"},
 {id:'us47',cc:'US',name:"Abiding Radio - Instrumental",genre:'Разное',c:['#30D158','#0A84FF'],logo:"https://www.abidingradio.org/wp-content/uploads/2022/05/cropped-new_icon.png",url:"https://streams.abidingradio.com/instrumental"},
@@ -1313,8 +1376,8 @@ const STATIONS=[
 {id:'ca32',cc:'CA',name:"Radio Canada Ici Première - Montréal, QC",genre:'Разное',c:['#FF375F','#BF5AF2'],logo:F('ici.radio-canada.ca/ohdio/premiere'),url:"https://rcavliveaudio.akamaized.net/hls/live/2006635/P-2QMTL0_MTL/master.m3u8",type:'hls'},
 {id:'ca33',cc:'CA',name:"CBC Radio 1 Toronto 99.1 FM",genre:'Разное',c:['#00B4DB','#0083B0'],logo:F('www.cbc.ca/news/canada/toronto'),url:"https://cbcradiolive.akamaized.net/hls/live/2041036/ES_R1ETR/adaptive_128/chunklist_ao.m3u8",type:'hls'},
 {id:'ca34',cc:'CA',name:"CBC Radio 1 Vancouver",genre:'Новости',c:['#FA233B','#FB5C74'],logo:F('www.cbc.ca/listen/live-radio'),url:"https://cbcradiolive.akamaized.net/hls/live/2041050/ES_R1PVC/master.m3u8",type:'hls'},
-{id:'ca35',cc:'CA',name:"CityNews Toronto",genre:'Разное',c:['#0A84FF','#5E5CE6'],logo:"https://toronto.citynews.ca/apple-touch-icon.png?v=2",url:"https://rogers-hls.leanstream.co/rogers/tor680.stream/icy?environment=tunein&args=tunein_01"},
-{id:'ca36',cc:'CA',name:"CHMP 985 FM",genre:'Новости',c:['#FF375F','#BF5AF2'],url:"https://playerservices.streamtheworld.com/api/livestream-redirect/CHMPFMAAC.aac"},
+{id:'ca35',cc:'CA',name:"CityNews Toronto",genre:'Разное',c:['#0A84FF','#5E5CE6'],logo:"https://toronto.citynews.ca/apple-touch-icon.png?v=2",url:U[2]+"tor680.stream/icy?environment=tunein&args=tunein_01"},
+{id:'ca36',cc:'CA',name:"CHMP 985 FM",genre:'Новости',c:['#FF375F','#BF5AF2'],url:U[0]+"CHMPFMAAC.aac"},
 {id:'ca37',cc:'CA',name:"Radio Pakistan Toronto",genre:'Разное',c:['#FFD60A','#1D3A6E'],url:"https://s3.radio.co/s3b10a57ef/listen"},
 {id:'ca38',cc:'CA',name:"WEFUNK",genre:'Хип-хоп',c:['#FFB800','#FF5E3A'],logo:"https://cache.wefunkradio.com/images-small/apple-touch-icon.png",url:"https://s-09.wefunkradio.com:8443/wefunk64.mp3"},
 {id:'ca39',cc:'CA',name:"CJRK-FM 102.7 \"East FM\" Toronto, ON",genre:'Разное',c:['#64D2FF','#5E5CE6'],logo:"https://t0.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=http%3A%2F%2Fwww.eastfm.ca%2F&size=256",url:"https://centova.radioservers.biz/proxy/eastfmc1/stream"},
@@ -1323,9 +1386,9 @@ const STATIONS=[
 {id:'ca42',cc:'CA',name:"PunkRockRadio.ca",genre:'Рок',c:['#8A3BE8','#E01B6A'],logo:"https://www.punkrockradio.ca/favicon.ico",url:"https://stream.radio.co/s904013bb1/listen"},
 {id:'ca43',cc:'CA',name:"CKYE-FM 93.1 \"Red FM\" Vancouver, BC",genre:'Разное',c:['#11998E','#38EF7D'],logo:F('vancouver.redfm.ca/'),url:"https://ice24.securenetsystems.net/CKYE"},
 {id:'ca44',cc:'CA',name:"J1 GOLD",genre:'Ретро',c:['#E5446D','#3A1C71'],logo:"https://mmo.aiircdn.com/387/5e76b6ebedcef.png",url:"https://jenny.torontocast.com:2000/stream/J1GOLD"},
-{id:'ca45',cc:'CA',name:"CHFI 98.1-Toronto",genre:'Разное',c:['#FF6A00','#FA233B'],logo:F('www.chfi.com/'),url:"https://rogers-hls.leanstream.co/rogers/tor981.stream/playlist.m3u8",type:'hls'},
-{id:'ca46',cc:'CA',name:"CKWX \"News 1130\" Vancouver, BC",genre:'Новости',c:['#00B4DB','#0083B0'],logo:"https://citynews1130.com/apple-touch-icon.png",url:"https://rogers-hls.leanstream.co/rogers/van1130.stream/playlist.m3u8",type:'hls'},
-{id:'ca47',cc:'CA',name:"CJAX \"Jack 96.9\" Vancouver, BC",genre:'Поп',c:['#00E676','#00B0FF'],logo:F('www.jack969.com/'),url:"https://rogers-hls.leanstream.co/rogers/van969.stream/playlist.m3u8",type:'hls'},
+{id:'ca45',cc:'CA',name:"CHFI 98.1-Toronto",genre:'Разное',c:['#FF6A00','#FA233B'],logo:F('www.chfi.com/'),url:U[2]+"tor981.stream/playlist.m3u8",type:'hls'},
+{id:'ca46',cc:'CA',name:"CKWX \"News 1130\" Vancouver, BC",genre:'Новости',c:['#00B4DB','#0083B0'],logo:"https://citynews1130.com/apple-touch-icon.png",url:U[2]+"van1130.stream/playlist.m3u8",type:'hls'},
+{id:'ca47',cc:'CA',name:"CJAX \"Jack 96.9\" Vancouver, BC",genre:'Поп',c:['#00E676','#00B0FF'],logo:F('www.jack969.com/'),url:U[2]+"van969.stream/playlist.m3u8",type:'hls'},
 {id:'ca48',cc:'CA',name:"RetroSouvenirs",genre:'Ретро',c:['#64D2FF','#5E5CE6'],logo:"https://retrosouvenirs.com/favicon.ico",url:"https://listen.radioking.com/radio/108/stream/61183"},
 {id:'ca49',cc:'CA',name:"DKFM Edge",genre:'Рок',c:['#11998E','#38EF7D'],logo:LG.wp,url:"https://radio.streemlion.com:4405/stream"},
 {id:'ca50',cc:'CA',name:"加拿大中文电台FM94.7",genre:'Разное',c:['#8A3BE8','#E01B6A'],logo:"https://zuiai.tv/zb_users/upload/2025/3/2025032078290297.jpg",url:"https://5b2959fe11444.streamlock.net/radio/fm947.stream/playlist.m3u8",type:'hls'},
@@ -1381,7 +1444,7 @@ const STATIONS=[
 {id:'jp41',cc:'JP',name:"MILCpod",genre:'Поп',c:['#F76B1C','#FDA085'],logo:"https://booth.pximg.net/1b3b1730-3c83-47fb-bb90-5043af605d63/i/8135483/4636d6a4-f95b-45b3-abd8-cad490173211_base_resized.jpg",url:"https://radio.milradio.info:9000/milcpod.m3u8",type:'hls'},
 {id:'jp42',cc:'JP',name:"RadiCro",genre:'Разное',c:['#F953C6','#B91D73'],logo:"https://www.radicro.com/images/company/main.jpg",url:"https://radicrojapan.out.airtime.pro/radicrojapan_b"},
 {id:'jp43',cc:'JP',name:"VRC放送局",genre:'Разное',c:['#64D2FF','#5E5CE6'],logo:"https://t2.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://vrctv.jp/&size=128",url:"https://vrc.gate.vrtv.jp/live?p=g&u=d"},
-{id:'jp44',cc:'JP',name:"City Poppers",genre:'Аниме',c:['#BF5AF2','#FF2D92'],logo:F('zeno.fm/radio/citypoppers/'),url:"https://stream.zeno.fm/ricmeoweux2uv"},
+{id:'jp44',cc:'JP',name:"City Poppers",genre:'Аниме',c:['#BF5AF2','#FF2D92'],logo:F('zeno.fm/radio/citypoppers/'),url:U[6]+"ricmeoweux2uv"},
 {id:'jp45',cc:'JP',name:"Oreo Chii",genre:'Разное',c:['#FF2D55','#7A3CFF'],url:"https://www.dropbox.com/scl/fi/cr0fnz92285jehid72r7p/Romanji-Hitorigotsu-by-Hachiware-Chiikawa-Full-lyrics-English-Vietnamese-Translation.mp3?rlkey=9naoagjdv4469sxx1ak7m9f1k&st=xjp5067g&raw=1"},
 {id:'jp46',cc:'JP',name:"VR Soundscape TV",genre:'Поп',c:['#11998E','#38EF7D'],logo:"https://t0.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://vrstv.jp/&size=128",url:"https://stream.vrstv.jp/"},
 {id:'jp47',cc:'JP',name:"神戸長田FMわぃわぃ",genre:'Разное',c:['#F76B1C','#FDA085'],logo:"https://cdn.instant.audio/images/logos/jpradio-jp/fmyy.png",url:"https://tcc117.jp/fmyy/asx/simulbroadcast.mp3"},
@@ -1395,32 +1458,32 @@ const STATIONS=[
 {id:'ru5',cc:'RU',name:"Женский Стендап",sub:"Стендап · 101.ru",genre:'Юмор',c:['#FF2D92','#8A3BE8'],logo:LG.r101,url:"https://pub0102.101.ru:8443/stream/pro/aac/64/448"},
 {id:'ru6',cc:'RU',name:"Stand-Up Comedy",sub:"Стендап 24/7 · 101.ru",genre:'Юмор',c:['#30D158','#00C7BE'],logo:LG.r101,url:"https://pub0102.101.ru:8443/stream/pro/aac/64/447"},
 {id:'ru7',cc:'RU',name:"ЮморФМ Стендапы",sub:"Стендапы и шутки · 101.ru",genre:'Юмор',c:['#BF5AF2','#FF2D92'],logo:LG.r101,url:"https://pub0201.101.ru/stream/pro/aac/64/245"},
-{id:'rec1',cc:'US',name:"Who's on First? · Эбботт и Костелло",sub:"Запись · Легендарная сценка, 1940-е",genre:'Юмор',c:['#64D2FF','#5E5CE6'],logo:"https://archive.org/services/img/AndrewsSisters451128AbbottAndCostello",url:"https://archive.org/download/AndrewsSisters451128AbbottAndCostello/Andrews%20Sisters%2045-11-28%20Abbott%20and%20Costello.mp3",rec:1},
-{id:'rec2',cc:'US',name:"The Jack Benny Program",sub:"Запись · Классика радио, 1940-е",genre:'Юмор',c:['#8A3BE8','#E01B6A'],logo:"https://archive.org/services/img/421129RommelSketch",url:"https://archive.org/download/421129RommelSketch/42-11-29%20Rommel%20sketch.mp3",rec:1},
-{id:'rec3',cc:'US',name:"Burns & Allen",sub:"Запись · Классика радио, 1940-е",genre:'Юмор',c:['#00C7BE','#0A84FF'],logo:"https://archive.org/services/img/BurnsAndAllen400805GeorgesMovie",url:"https://archive.org/download/BurnsAndAllen400805GeorgesMovie/Burns%20and%20Allen%2040-08-05%20George's%20Movie.mp3",rec:1},
-{id:'rec4',cc:'US',name:"Fibber McGee & Molly",sub:"Запись · Классика радио, 1940-е",genre:'Юмор',c:['#FF6A00','#FA233B'],logo:"https://archive.org/services/img/FibberMcGeeandMolly1945",url:"https://archive.org/download/FibberMcGeeandMolly1945/451225_Docs_Gift_To_McGee.mp3",rec:1},
-{id:'rec5',cc:'GB',name:"The Goon Show",sub:"Запись · BBC Radio Comedy",genre:'Юмор',c:['#0A84FF','#5E5CE6'],logo:"https://archive.org/services/img/TheGoonShow2012.04.26",url:"https://archive.org/download/TheGoonShow2012.04.26/2012.04.26_02_Intro.mp3",rec:1},
-{id:'rec6',cc:'US',name:"The Bob Hope Show",sub:"Запись · Классика радио, 1940-е",genre:'Юмор',c:['#FF9F0A','#FF375F'],logo:"https://archive.org/services/img/BobHopeShow430928GuestOrsonWelles",url:"https://archive.org/download/BobHopeShow430928GuestOrsonWelles/Bob%20Hope%20Show%2043-09-28%20Guest%20-%20Orson%20Welles.mp3",rec:1},
-{id:'rec7',cc:'US',name:"My Friend Irma",sub:"Запись · Классика радио, 1940-е",genre:'Юмор',c:['#FFD60A','#1D3A6E'],logo:"https://archive.org/services/img/my-friend-irma-1948-04-05-52-irmas-inheritance",url:"https://archive.org/download/my-friend-irma-1948-04-05-52-irmas-inheritance/Wrigley's%20Thanksgiving%20Show%201948-11-25%20(xx)%20My%20Friend%20Irma.mp3",rec:1},
-{id:'rec8',cc:'US',name:"Adventures of Ozzie & Harriet",sub:"Запись · Классика радио, 1940-е",genre:'Юмор',c:['#30D158','#0A84FF'],logo:"https://archive.org/services/img/AdventuresOfOzzie_Harriet",url:"https://archive.org/download/AdventuresOfOzzie_Harriet/Ozzie_and_Harriet_511116_291_Sidewalk_Superintendents.mp3",rec:1},
-{id:'rec9',cc:'RU',name:"Аркадий Райкин · От двух до пятидесяти",sub:"Запись · Театр миниатюр, 1963",genre:'Юмор',c:['#FA233B','#8A3BE8'],logo:"https://archive.org/services/img/d_12523",url:"https://archive.org/download/d_12523/d_12523.mp3",rec:1},
-{id:'rec10',cc:'RU',name:"Аркадий Райкин · Творческий вечер",sub:"Запись · Ленинградское радио",genre:'Юмор',c:['#E01B6A','#5E5CE6'],logo:"https://archive.org/services/img/CollectionRadioUssr",url:"https://archive.org/download/CollectionRadioUssr/tvorcheskij.vecher.arkadija.rajkina.na.leningradskom.radio.mp3",rec:1},
-{id:'rec11',cc:'RU',name:"Анекдоты про Штирлица",sub:"Запись · Радиоанекдоты СССР",genre:'Юмор',c:['#64D2FF','#30D158'],logo:"https://archive.org/services/img/02_20190925_20190925",url:"https://archive.org/download/02_20190925_20190925/02.mp3",rec:1},
-{id:'rec12',cc:'RU',name:"Анекдоты о Петре Великом",sub:"Запись · Исторические анекдоты",genre:'Юмор',c:['#FFD60A','#FF6A00'],logo:"https://archive.org/services/img/sviridov_emailna_A041",url:"https://archive.org/download/sviridov_emailna_A041/Nartov%20A.%20K.%20-%20Anekdoty%20o%20Petre%20Velikom-256kbps%5Btorrents.ru%5D%2FBook%2FA_040_059%2FA_041.mp3",rec:1},
-{id:'rec13',cc:'RU',name:"Михаил Задорнов · Я люблю Америку",sub:"Запись · Концерт, 2000-е",genre:'Юмор',c:['#0A84FF','#8A3BE8'],logo:"https://archive.org/services/img/04-02_20250105",url:"https://archive.org/download/04-02_20250105/04-02.mp3",rec:1},
-{id:'rec14',cc:'RU',name:"Городок · Буратино",sub:"Запись · Радиопередача",genre:'Юмор',c:['#30D158','#FFD60A'],logo:"https://archive.org/services/img/20210521_20210521_1016",url:"https://archive.org/download/20210521_20210521_1016/%D0%93%D0%BE%D1%80%D0%BE%D0%B4%D0%BE%D0%BA%20%D0%91%D1%83%D1%80%D0%B0%D1%82%D0%B8%D0%BD%D0%BE_______.mp3",rec:1},
-{id:'rec15',cc:'RU',name:"Анекдоты от Гоши Маньяка",sub:"Запись · Авторские анекдоты, 2018",genre:'Юмор',c:['#FF6A00','#FF2D92'],logo:"https://archive.org/services/img/IBR_717",url:"https://archive.org/download/IBR_717/01.%20%D0%A4%D0%BE%D1%80%D0%B4%20%D0%A4%D0%BE%D0%BA%D1%83%D1%81.MP3",rec:1},
+{id:'rec1',cc:'US',name:"Who's on First? · Эбботт и Костелло",sub:"Запись · Легендарная сценка, 1940-е",genre:'Юмор',c:['#64D2FF','#5E5CE6'],logo:"https://archive.org/services/img/AndrewsSisters451128AbbottAndCostello",url:U[5]+"AndrewsSisters451128AbbottAndCostello/Andrews%20Sisters%2045-11-28%20Abbott%20and%20Costello.mp3",rec:1},
+{id:'rec2',cc:'US',name:"The Jack Benny Program",sub:"Запись · Классика радио, 1940-е",genre:'Юмор',c:['#8A3BE8','#E01B6A'],logo:"https://archive.org/services/img/421129RommelSketch",url:U[5]+"421129RommelSketch/42-11-29%20Rommel%20sketch.mp3",rec:1},
+{id:'rec3',cc:'US',name:"Burns & Allen",sub:"Запись · Классика радио, 1940-е",genre:'Юмор',c:['#00C7BE','#0A84FF'],logo:"https://archive.org/services/img/BurnsAndAllen400805GeorgesMovie",url:U[5]+"BurnsAndAllen400805GeorgesMovie/Burns%20and%20Allen%2040-08-05%20George's%20Movie.mp3",rec:1},
+{id:'rec4',cc:'US',name:"Fibber McGee & Molly",sub:"Запись · Классика радио, 1940-е",genre:'Юмор',c:['#FF6A00','#FA233B'],logo:"https://archive.org/services/img/FibberMcGeeandMolly1945",url:U[5]+"FibberMcGeeandMolly1945/451225_Docs_Gift_To_McGee.mp3",rec:1},
+{id:'rec5',cc:'GB',name:"The Goon Show",sub:"Запись · BBC Radio Comedy",genre:'Юмор',c:['#0A84FF','#5E5CE6'],logo:"https://archive.org/services/img/TheGoonShow2012.04.26",url:U[5]+"TheGoonShow2012.04.26/2012.04.26_02_Intro.mp3",rec:1},
+{id:'rec6',cc:'US',name:"The Bob Hope Show",sub:"Запись · Классика радио, 1940-е",genre:'Юмор',c:['#FF9F0A','#FF375F'],logo:"https://archive.org/services/img/BobHopeShow430928GuestOrsonWelles",url:U[5]+"BobHopeShow430928GuestOrsonWelles/Bob%20Hope%20Show%2043-09-28%20Guest%20-%20Orson%20Welles.mp3",rec:1},
+{id:'rec7',cc:'US',name:"My Friend Irma",sub:"Запись · Классика радио, 1940-е",genre:'Юмор',c:['#FFD60A','#1D3A6E'],logo:"https://archive.org/services/img/my-friend-irma-1948-04-05-52-irmas-inheritance",url:U[5]+"my-friend-irma-1948-04-05-52-irmas-inheritance/Wrigley's%20Thanksgiving%20Show%201948-11-25%20(xx)%20My%20Friend%20Irma.mp3",rec:1},
+{id:'rec8',cc:'US',name:"Adventures of Ozzie & Harriet",sub:"Запись · Классика радио, 1940-е",genre:'Юмор',c:['#30D158','#0A84FF'],logo:"https://archive.org/services/img/AdventuresOfOzzie_Harriet",url:U[5]+"AdventuresOfOzzie_Harriet/Ozzie_and_Harriet_511116_291_Sidewalk_Superintendents.mp3",rec:1},
+{id:'rec9',cc:'RU',name:"Аркадий Райкин · От двух до пятидесяти",sub:"Запись · Театр миниатюр, 1963",genre:'Юмор',c:['#FA233B','#8A3BE8'],logo:"https://archive.org/services/img/d_12523",url:U[5]+"d_12523/d_12523.mp3",rec:1},
+{id:'rec10',cc:'RU',name:"Аркадий Райкин · Творческий вечер",sub:"Запись · Ленинградское радио",genre:'Юмор',c:['#E01B6A','#5E5CE6'],logo:"https://archive.org/services/img/CollectionRadioUssr",url:U[5]+"CollectionRadioUssr/tvorcheskij.vecher.arkadija.rajkina.na.leningradskom.radio.mp3",rec:1},
+{id:'rec11',cc:'RU',name:"Анекдоты про Штирлица",sub:"Запись · Радиоанекдоты СССР",genre:'Юмор',c:['#64D2FF','#30D158'],logo:"https://archive.org/services/img/02_20190925_20190925",url:U[5]+"02_20190925_20190925/02.mp3",rec:1},
+{id:'rec12',cc:'RU',name:"Анекдоты о Петре Великом",sub:"Запись · Исторические анекдоты",genre:'Юмор',c:['#FFD60A','#FF6A00'],logo:"https://archive.org/services/img/sviridov_emailna_A041",url:U[5]+"sviridov_emailna_A041/Nartov%20A.%20K.%20-%20Anekdoty%20o%20Petre%20Velikom-256kbps%5Btorrents.ru%5D%2FBook%2FA_040_059%2FA_041.mp3",rec:1},
+{id:'rec13',cc:'RU',name:"Михаил Задорнов · Я люблю Америку",sub:"Запись · Концерт, 2000-е",genre:'Юмор',c:['#0A84FF','#8A3BE8'],logo:"https://archive.org/services/img/04-02_20250105",url:U[5]+"04-02_20250105/04-02.mp3",rec:1},
+{id:'rec14',cc:'RU',name:"Городок · Буратино",sub:"Запись · Радиопередача",genre:'Юмор',c:['#30D158','#FFD60A'],logo:"https://archive.org/services/img/20210521_20210521_1016",url:U[5]+"20210521_20210521_1016/%D0%93%D0%BE%D1%80%D0%BE%D0%B4%D0%BE%D0%BA%20%D0%91%D1%83%D1%80%D0%B0%D1%82%D0%B8%D0%BD%D0%BE_______.mp3",rec:1},
+{id:'rec15',cc:'RU',name:"Анекдоты от Гоши Маньяка",sub:"Запись · Авторские анекдоты, 2018",genre:'Юмор',c:['#FF6A00','#FF2D92'],logo:"https://archive.org/services/img/IBR_717",url:U[5]+"IBR_717/01.%20%D0%A4%D0%BE%D1%80%D0%B4%20%D0%A4%D0%BE%D0%BA%D1%83%D1%81.MP3",rec:1},
 {id:'it1',cc:'IT',name:"Radio Armisa",genre:'Танцевальная',c:['#FF2D55','#7A3CFF'],logo:"https://armisa.it/assets/favicon/android-chrome-512x512.png",url:"https://onair.armisa.it/listen/armisa/radio.mp3"},
 {id:'it2',cc:'IT',name:"Radio Italia Solo Musica Italiana",genre:'Поп',c:['#FFD60A','#FF9F0A'],logo:"https://www.radioitalia.it/images/logo-radioitalia.png",url:"https://radioitaliasmi.akamaized.net/hls/live/2093120/RISMI/stream01/streamPlaylist.m3u8",type:'hls'},
 {id:'it3',cc:'IT',name:"Radio Sportiva",genre:'Спорт',c:['#5AC8FA','#0A84FF'],logo:"https://www.radiosportiva.com/wp-content/uploads/2021/09/logo-radiosportiva-white.svg",url:"https://sportiva.inmystream.it/stream/sportiva"},
 {id:'it4',cc:'IT',name:"Radio Sei",genre:'Новости',c:['#F76B1C','#FDA085'],logo:F('radiosei.it/'),url:"https://icecast.ithost.it/radiosei.ogg"},
 {id:'it5',cc:'IT',name:"RTL 102.5",genre:'Новости',c:['#00C7BE','#0A84FF'],logo:"https://cloud.rtl.it/assets/www.rtl.it/3.0.64/img/logo/favicon-96x96.png",url:"https://dd782ed59e2a4e86aabf6fc508674b59.msvdn.net/live/S97044836/tbbP8T1ZRPBL/playlist_audio.m3u8",type:'hls'},
-{id:'it6',cc:'IT',name:"Radio M2O",genre:'Танцевальная',c:['#FA233B','#FB5C74'],logo:F('www.m2o.it/'),url:"https://4c4b867c89244861ac216426883d1ad0.msvdn.net/radiom2o/radiom2o/master_ma.m3u8",type:'hls'},
-{id:'it7',cc:'IT',name:"Radio Capital",sub:"GEDI · классический рок",genre:'Рок',c:['#00E676','#00B0FF'],logo:LG.capital,url:"https://4c4b867c89244861ac216426883d1ad0.msvdn.net/radiocapital/radiocapital/master_ma.m3u8",type:'hls'},
+{id:'it6',cc:'IT',name:"Radio M2O",genre:'Танцевальная',c:['#FA233B','#FB5C74'],logo:F('www.m2o.it/'),url:U[1]+"radiom2o/radiom2o/master_ma.m3u8",type:'hls'},
+{id:'it7',cc:'IT',name:"Radio Capital",sub:"GEDI · классический рок",genre:'Рок',c:['#00E676','#00B0FF'],logo:LG.capital,url:U[1]+"radiocapital/radiocapital/master_ma.m3u8",type:'hls'},
 {id:'it8',cc:'IT',name:"Radio Freccia",genre:'Рок',c:['#00C7BE','#0A84FF'],logo:"https://cloud.radiofreccia.it/assets/www.radiofreccia.it/1.0.43/img/logo/android-icon-192x192.png",url:"https://dd782ed59e2a4e86aabf6fc508674b59.msvdn.net/live/S3160845/0tuSetc8UFkF/playlist_audio.m3u8",type:'hls'},
 {id:'it9',cc:'IT',name:"RADIO SUBASIO",genre:'Разное',c:['#FFD60A','#1D3A6E'],logo:"https://www.radiosubasio.it/wp-content/themes/radiosubasiov2/assets/images/logo-radio-subasio.png",url:"https://icy.unitedradio.it/Subasio.mp3"},
 {id:'it10',cc:'IT',name:"RADIO ITALIANA",genre:'Разное',c:['#64D2FF','#5E5CE6'],logo:"https://cdn.sedo.com/c7r/assets/static/images/icons/apple-touch-icon.png",url:"https://radiorossini.stream.laut.fm/radiorossini"},
-{id:'it11',cc:'IT',name:"50s 60s RETRO HITS",genre:'Рок',c:['#E5446D','#3A1C71'],logo:"https://static.wixstatic.com/media/f361b3_ea9b293c1b80488d97f24981e7c6c1d3~mv2.jpg",url:"https://stream.zeno.fm/pxzwykxbluitv"},
+{id:'it11',cc:'IT',name:"50s 60s RETRO HITS",genre:'Рок',c:['#E5446D','#3A1C71'],logo:"https://static.wixstatic.com/media/f361b3_ea9b293c1b80488d97f24981e7c6c1d3~mv2.jpg",url:U[6]+"pxzwykxbluitv"},
 {id:'it12',cc:'IT',name:"Radio Capital",sub:"GEDI · альтернативный поток",genre:'Рок',c:['#5E5CE6','#FF2D92'],url:"https://streamcdnr8-4c4b867c89244861ac216426883d1ad0.msvdn.net/radiocapital/radiocapital/play1.m3u8",type:'hls'},
 {id:'it13',cc:'IT',name:"Rai News 24",genre:'Новости',c:['#FFD60A','#FF9F0A'],logo:F('rainews.it/'),url:"https://streamcdnb3-8e7439fdb1694c8da3a0fd63e4dda518.msvdn.net/rainews1/hls/rainews_2400/chunklist.m3u8",type:'hls'},
 {id:'it14',cc:'IT',name:"Radio RaiSport",genre:'Спорт',c:['#11998E','#38EF7D'],logo:"https://static.mytuner.mobi/media/tvos_radios/ramgajabuhqm.jpg",url:"https://icecdn-19d24861e90342cc8decb03c24c8a419.msvdn.net/icecastRelay/S74167340/mmNY37FME5Zl/icecast"},
@@ -1428,20 +1491,20 @@ const STATIONS=[
 {id:'it16',cc:'IT',name:"Radio Italia Sanremo",genre:'Поп',c:['#FF2D55','#7A3CFF'],logo:"https://www.radioitalia.it/images/logo-webradio-sanremo.png",url:"https://stream4.xdevel.com/audio2s976608-1381/stream/icecast.audio"},
 {id:'it17',cc:'IT',name:"70 80 90",genre:'Ретро',c:['#5E5CE6','#FF2D92'],logo:"https://www.radio708090.it/wp-content/uploads/2021/10/708090-160-150x150.png",url:"https://rblive.it:8170/radio.mp3"},
 {id:'it18',cc:'IT',name:"Globo Vintage",genre:'Ретро',c:['#5AC8FA','#0A84FF'],logo:"https://static.wixstatic.com/media/cb9577_389d27d8f1214dfba6d28a9381d7ccdc%7emv2.png/v1/fill/w_180%2ch_180%2clg_1%2cusm_0.66_1.00_0.01/cb9577_389d27d8f1214dfba6d28a9381d7ccdc%7emv2.png",url:"https://m100.newradio.it/m100-64"},
-{id:'it19',cc:'IT',name:"# 100 NU-DISCO CENTRAL RADIO",genre:'Танцевальная',c:['#5E5CE6','#FF2D92'],logo:"https://static.wixstatic.com/media/f361b3_66f56cd8d2f44aed871cfd62bf70af65~mv2.jpg",url:"https://stream.zeno.fm/jqhhzffjynbuv"},
+{id:'it19',cc:'IT',name:"# 100 NU-DISCO CENTRAL RADIO",genre:'Танцевальная',c:['#5E5CE6','#FF2D92'],logo:"https://static.wixstatic.com/media/f361b3_66f56cd8d2f44aed871cfd62bf70af65~mv2.jpg",url:U[6]+"jqhhzffjynbuv"},
 {id:'it20',cc:'IT',name:"DeeGay Classic",genre:'Поп',c:['#00B4DB','#0083B0'],logo:"https://play5.newradio.it/contents/uploads/logo-43441.png",url:"https://stream.deegay.fm/deegay2.mp3"},
 {id:'it21',cc:'IT',name:"RTL 102.5 Best",genre:'Поп',c:['#8A3BE8','#E01B6A'],logo:"https://cloud.rtl.it/assets/play.rtl.it/2.1.5/img/logo/favicon-96x96.png",url:"https://streamingv2.shoutcast.com/rtl-1025-best"},
 {id:'it22',cc:'IT',name:"Radio Bandito",genre:'Разное',c:['#F76B1C','#FDA085'],logo:"https://www.radiobandito.it/wp-content/uploads/2022/04/cropped-cropped-rb-180x180.png",url:"https://s2.radio.co/s8add5b3eb/listen"},
 {id:'it23',cc:'IT',name:"Milano XR",genre:'Рок',c:['#8A3BE8','#E01B6A'],logo:"https://milanoxr.gatesweb.info:8443/milanoxr_logo-300-sq.jpg",url:"https://milanoxr.gatesweb.info:8443/live"},
 {id:'it24',cc:'IT',name:"Radio Bruno Pentasport Fiorentina",genre:'Спорт',c:['#FFB800','#FF5E3A'],logo:"https://www.radiobruno.it/wp-content/uploads/2023/10/logo-148-90-black1.png",url:"https://stream3.xdevel.com/audio6s975355-281/stream/icecast.audio"},
-{id:'it25',cc:'IT',name:"Deejay Suona Italia",genre:'Поп',c:['#5E5CE6','#FF2D92'],logo:"https://cdn.gelestatic.it/deejay/sites/2/2015/05/webradio_deejay_suona_italia-320x320.png",url:"https://4c4b867c89244861ac216426883d1ad0.msvdn.net/webradio/deejaysuonaitalia/playlist.m3u8",type:'hls'},
+{id:'it25',cc:'IT',name:"Deejay Suona Italia",genre:'Поп',c:['#5E5CE6','#FF2D92'],logo:"https://cdn.gelestatic.it/deejay/sites/2/2015/05/webradio_deejay_suona_italia-320x320.png",url:U[1]+"webradio/deejaysuonaitalia/playlist.m3u8",type:'hls'},
 {id:'it26',cc:'IT',name:"Rai Isoradio",genre:'Поп',c:['#00C7BE','#0A84FF'],logo:F('raiplaysound.it/'),url:"https://icecdn-19d24861e90342cc8decb03c24c8a419.msvdn.net/icecastRelay/S3822289/9T4F68Q3TT4m/icecast"},
 {id:'it27',cc:'IT',name:"GEDI - Radio Capital Funky Town",genre:'Разное',c:['#F76B1C','#FDA085'],logo:LG.capital,url:"https://streamcdnr11-4c4b867c89244861ac216426883d1ad0.msvdn.net/radiocapitalfunkytown/radiocapitalfunkytown/play1.m3u8",type:'hls'},
 {id:'it28',cc:'IT',name:"Italo Disco",genre:'Танцевальная',c:['#12C2E9','#C471ED'],logo:"https://top-radio.ru/assets/image/radio/180/radio-italo-disco.png",url:"https://italo-disco.stream.laut.fm/italo-disco"},
 {id:'it29',cc:'IT',name:"FOREVER 70",genre:'Танцевальная',c:['#F76B1C','#FDA085'],logo:"https://forever80.altervista.org/wp-content/uploads/2020/01/FOREVER-70-DANCE-POP-320x207.jpg",url:"https://stream.laut.fm/forever70"},
 {id:'it30',cc:'IT',name:"Radio Bruno - Made in Italy",genre:'Поп',c:['#E5446D','#3A1C71'],logo:"https://www.radiobruno.it/wp-content/uploads/2019/11/made-in-italy.jpg",url:"https://stream2.xdevel.com/audio1s975355-54/stream/icecast.audio"},
 {id:'it31',cc:'IT',name:"LifeGate Radio Blues",genre:'Джаз',c:['#00E676','#00B0FF'],logo:"https://www.lifegate.it/app/themes/lifegate-2020/dist/images/apple-touch-icon.png",url:"https://router.xdevel.com/audio3s975809-348/stream/icecast.audio"},
-{id:'it32',cc:'IT',name:"Deejay Time",genre:'Танцевальная',c:['#11998E','#38EF7D'],logo:"https://cdn.gelestatic.it/deejay/sites/2/2015/05/webradio_deejay_time-320x320.png",url:"https://4c4b867c89244861ac216426883d1ad0.msvdn.net/webradio/deejaytime/playlist.m3u8",type:'hls'},
+{id:'it32',cc:'IT',name:"Deejay Time",genre:'Танцевальная',c:['#11998E','#38EF7D'],logo:"https://cdn.gelestatic.it/deejay/sites/2/2015/05/webradio_deejay_time-320x320.png",url:U[1]+"webradio/deejaytime/playlist.m3u8",type:'hls'},
 {id:'it33',cc:'IT',name:"Virgin Radio Italy",genre:'Рок',c:['#00E676','#00B0FF'],logo:"https://www.virginradio.it/wp-content/themes/virgin-radio-theme/public/images/VRG-symbol-footer.066739.png",url:"https://icy.unitedradio.it/Virgin.mp3"},
 {id:'it34',cc:'IT',name:"NBC Milano",genre:'Поп',c:['#00E676','#00B0FF'],logo:"https://www.70-80.it/wp-content/uploads/2020/03/logo-70-80-75x75.jpg",url:"https://nr7.newradio.it:19350/stream"},
 {id:'it35',cc:'IT',name:"FOREVER 90",genre:'Рок',c:['#5E5CE6','#FF2D92'],logo:"https://forever80.altervista.org/wp-content/uploads/2020/01/FOREVER-90-dance-pop-320x207.jpg",url:"https://stream.laut.fm/forever90"},
@@ -1453,7 +1516,7 @@ const STATIONS=[
 {id:'it41',cc:'IT',name:"Radio Manà Manà Sport Roma",genre:'Новости',c:['#F76B1C','#FDA085'],logo:F('www.manamanasportroma.it/'),url:"https://stream10.xdevel.com/audio2s975363-2142/stream/icecast.audio"},
 {id:'it42',cc:'IT',name:"Retesport",genre:'Новости',c:['#FF2D55','#7A3CFF'],logo:F('www.retesport.it/'),url:"https://icecast.ithost.it/retesport.ogg"},
 {id:'it43',cc:'IT',name:"RDS 100% Grandi Successi",genre:'Разное',c:['#F953C6','#B91D73'],logo:F('www.rds.it/'),url:"https://stream.rds.radio/audio/rds.stream_aac64/chunklist.m3u8",type:'hls'},
-{id:'it44',cc:'IT',name:"Radio Deejay",genre:'Новости',c:['#12C2E9','#C471ED'],logo:F('www.deejay.it/'),url:"https://4c4b867c89244861ac216426883d1ad0.msvdn.net/radiodeejay/radiodeejay/master_ma.m3u8",type:'hls'},
+{id:'it44',cc:'IT',name:"Radio Deejay",genre:'Новости',c:['#12C2E9','#C471ED'],logo:F('www.deejay.it/'),url:U[1]+"radiodeejay/radiodeejay/master_ma.m3u8",type:'hls'},
 {id:'it45',cc:'IT',name:"Virgin Radio Rockstar: Rolling Stones",genre:'Рок',c:['#64D2FF','#5E5CE6'],logo:F('www.virginradio.it/'),url:"https://icy.unitedradio.it/VirginSpecialEvent.mp3"},
 {id:'it46',cc:'IT',name:"Radio Romanista",genre:'Новости',c:['#FF9F0A','#FF375F'],url:"https://romanista.newradio.it/stream"},
 {id:'it47',cc:'IT',name:"Lattemiele",genre:'Поп',c:['#F76B1C','#FDA085'],logo:F('lattemiele.com/'),url:"https://sr15.inmystream.it:8000/stream"},
@@ -1538,11 +1601,11 @@ const STATIONS=[
 {id:'mx3',cc:'MX',name:"Wonder 80's Flashback",genre:'Ретро',c:['#5E5CE6','#FF2D92'],logo:"https://static.mytuner.mobi/media/tvos_radios/2C5DZ9pVXS.jpg",url:"https://80.streeemer.com/listen/80s/radio.aac"},
 {id:'mx4',cc:'MX',name:"Radio Metrópoli 1150 AM",sub:"Гвадалахара · XEAD-AM · новости",genre:'Новости',c:['#8A3BE8','#E01B6A'],logo:"https://www.notisistema.com/markup/images/metropoli_logo.png",url:"https://s2.yesstreaming.net:9088/stream"},
 {id:'mx5',cc:'MX',name:"Radio Habana Son Cuba",genre:'Разное',c:['#11998E','#38EF7D'],logo:"https://nl.radio.net/300/habanasoncuba.jpeg?version=6fdbc3dbc7d745014ffb8994bf030394",url:"https://stream-156.zeno.fm/2ieszeso9istv?zt=eyJhbGciOiJIUzI1NiJ9.eyJzdHJlYW0iOiIyaWVzemVzbzlpc3R2IiwiaG9zdCI6InN0cmVhbS0xNTYuemVuby5mbSIsInJ0dGwiOjUsImp0aSI6ImRoeHB4SkJzUmh5RzlBM0xfRHVvRkEiLCJpYXQiOjE3Mjk0MzU1NzksImV4cCI6MTcyOTQzNTYzOX0.eskM8oX6MH4fkh0idjraQmf-EXQScdjOHbUODLkzMns"},
-{id:'mx6',cc:'MX',name:"STEREOREY: La Máxima Dimensión del Radio.",genre:'Рок',c:['#FF6A00','#FA233B'],url:"https://playerservices.streamtheworld.com/api/livestream-redirect/STEREOREYAAC.aac"},
-{id:'mx7',cc:'MX',name:"EXA FM: En Todas Partes Ponte Exa",genre:'Разное',c:['#F953C6','#B91D73'],logo:"https://d1yjjnpx0p53s8.cloudfront.net/styles/logo-thumbnail/s3/092013/exa.jpg",url:"https://playerservices.streamtheworld.com/api/livestream-redirect/XHPSFMAAC.aac"},
-{id:'mx8',cc:'MX',name:"LOS40",genre:'Разное',c:['#F953C6','#B91D73'],logo:"https://los40mx00.epimg.net/iconos/v1.x/v1.0/touch-apple.png",url:"https://playerservices.streamtheworld.com/api/livestream-redirect/LOS40_MEXICO_SC"},
+{id:'mx6',cc:'MX',name:"STEREOREY: La Máxima Dimensión del Radio.",genre:'Рок',c:['#FF6A00','#FA233B'],url:U[0]+"STEREOREYAAC.aac"},
+{id:'mx7',cc:'MX',name:"EXA FM: En Todas Partes Ponte Exa",genre:'Разное',c:['#F953C6','#B91D73'],logo:"https://d1yjjnpx0p53s8.cloudfront.net/styles/logo-thumbnail/s3/092013/exa.jpg",url:U[0]+"XHPSFMAAC.aac"},
+{id:'mx8',cc:'MX',name:"LOS40",genre:'Разное',c:['#F953C6','#B91D73'],logo:"https://los40mx00.epimg.net/iconos/v1.x/v1.0/touch-apple.png",url:U[0]+"LOS40_MEXICO_SC"},
 {id:'mx9',cc:'MX',name:"La ranchera",genre:'Латина',c:['#00E676','#00B0FF'],logo:"https://cdn.mytuner.mobi/static/ctr/images/country/mx.png",url:"https://live.zuperdns.net/9730/stream/;stream.mp3"},
-{id:'mx10',cc:'MX',name:"Best FM - Best Retro Music in English",genre:'Ретро',c:['#FF6A00','#FA233B'],logo:"https://zeno.fm/_next/image/?url=https%3A%2F%2Fimages.zeno.fm%2FoRVpMTlmQYDCY9RR47UrZwT16xtopcll28hNtrpf6aM%2Frs%3Afit%3A1500%3A600%2Fg%3Ace%3A0%3A0%2FaHR0cHM6Ly9zdHJlYW0tdG9vbHMuemVub21lZGlhLmNvbS9jb250ZW50L3N0YXRpb25zL2FneHpmbnBsYm04dGMzUmhkSE55TWdzU0NrRjFkR2hEYkdsbGJuUVlnSUNBa3RfSGtRc01DeElPVTNSaGRHbHZibEJ5YjJacGJHVVlnSUNnMll6QW13a01vZ0VFZW1WdWJ3L21pY3Jvc2l0ZS9iYWNrZ3JvdW5kX2ltYWdlLz91cGRhdGVkPTE2NjE0NTEwMTMwMDA.webp&w=1920&q=70",url:"https://stream.zeno.fm/9ep9qg3za6quv"},
+{id:'mx10',cc:'MX',name:"Best FM - Best Retro Music in English",genre:'Ретро',c:['#FF6A00','#FA233B'],logo:"https://zeno.fm/_next/image/?url=https%3A%2F%2Fimages.zeno.fm%2FoRVpMTlmQYDCY9RR47UrZwT16xtopcll28hNtrpf6aM%2Frs%3Afit%3A1500%3A600%2Fg%3Ace%3A0%3A0%2FaHR0cHM6Ly9zdHJlYW0tdG9vbHMuemVub21lZGlhLmNvbS9jb250ZW50L3N0YXRpb25zL2FneHpmbnBsYm04dGMzUmhkSE55TWdzU0NrRjFkR2hEYkdsbGJuUVlnSUNBa3RfSGtRc01DeElPVTNSaGRHbHZibEJ5YjJacGJHVVlnSUNnMll6QW13a01vZ0VFZW1WdWJ3L21pY3Jvc2l0ZS9iYWNrZ3JvdW5kX2ltYWdlLz91cGRhdGVkPTE2NjE0NTEwMTMwMDA.webp&w=1920&q=70",url:U[6]+"9ep9qg3za6quv"},
 {id:'mx11',cc:'MX',name:"Rclasicos 96.9 FM",genre:'Латина',c:['#BF5AF2','#FF2D92'],logo:"https://rclasicos.com/logohd2022.png",url:"https://s5.mexside.net:8100/stream"},
 {id:'mx12',cc:'MX',name:"MIX: 80's, 90's y Más",genre:'Ретро',c:['#FA233B','#FB5C74'],logo:"https://i.postimg.cc/J4K5Xkqz/mix.jpg",url:"https://18363.live.streamtheworld.com:443/XHDFMFMAAC.aac"},
 {id:'mx13',cc:'MX',name:"+Exclusively Dua Lipa",genre:'Поп',c:['#DA4453','#89216B'],logo:"https://you.radio/cdn-cgi/image/width=400,quality=75/https://manager.uber.radio/static/uploads/station/fea8173f-a85c-4052-8ee4-ca03a71e094d.jpg",url:"https://streaming.exclusive.radio/er-app/dualipa/icecast.audio"},
@@ -1550,35 +1613,35 @@ const STATIONS=[
 {id:'mx15',cc:'MX',name:"Cafe Romantico Radio",genre:'Латина',c:['#FF6A00','#FA233B'],logo:"https://caferomanticoradio.com/assets/images/crrbann-2000x746-19.jpg",url:"https://panel.retrolandigital.com/listen/cafe_romantico_radio/listen"},
 {id:'mx16',cc:'MX',name:"+Exclusively Green Day",genre:'Ретро',c:['#11998E','#38EF7D'],logo:"https://you.radio/cdn-cgi/image/width=400,quality=75/https://manager.uber.radio/static/uploads/station/15ef0b00-1511-4a36-9a0d-17391449ac7e.jpg",url:"https://streaming.exclusive.radio/er-app/greenday/icecast.audio"},
 {id:'mx17',cc:'MX',name:"AMOR: Sólo Música Romántica",genre:'Латина',c:['#FF375F','#BF5AF2'],logo:"https://i.postimg.cc/FKgrF3cw/amor.jpg",url:"https://18373.live.streamtheworld.com:443/XHSHFMAAC.aac"},
-{id:'mx18',cc:'MX',name:"AMOR SOLO POP: Pop y baladas en español",genre:'Латина',c:['#00E676','#00B0FF'],logo:"https://i.iheart.com/v3/re/new_assets/6230ca02be123875849470cd",url:"https://playerservices.streamtheworld.com/api/livestream-redirect/ACIR03_s01AAC.aac"},
-{id:'mx19',cc:'MX',name:"La romántica Puebla 92.9 FM HD2",genre:'Латина',c:['#FFD60A','#1D3A6E'],logo:"https://www.laromantica.com.mx/wp-content/uploads/2022/02/logo_la-romantica_2ago2021_186_hd2.png",url:"https://stream.zeno.fm/q5f7ne3sb18uv"},
+{id:'mx18',cc:'MX',name:"AMOR SOLO POP: Pop y baladas en español",genre:'Латина',c:['#00E676','#00B0FF'],logo:"https://i.iheart.com/v3/re/new_assets/6230ca02be123875849470cd",url:U[0]+"ACIR03_s01AAC.aac"},
+{id:'mx19',cc:'MX',name:"La romántica Puebla 92.9 FM HD2",genre:'Латина',c:['#FFD60A','#1D3A6E'],logo:"https://www.laromantica.com.mx/wp-content/uploads/2022/02/logo_la-romantica_2ago2021_186_hd2.png",url:U[6]+"q5f7ne3sb18uv"},
 {id:'mx20',cc:'MX',name:"RCA 105.9 Radio Cultural Ayuntamiento",genre:'Новости',c:['#FF2D55','#7A3CFF'],logo:"https://rcacancun.gob.mx/favicon.ico",url:"https://usa3.lhdserver.es:8307/stream"},
-{id:'mx21',cc:'MX',name:"Mix 92.7 FM Puerto Vallarta",genre:'Танцевальная',c:['#FA233B','#FB5C74'],logo:"https://i.iheart.com/v3/re/new_assets/5e55c5f1f2e817641ab904b2?ops=fit(960%2C960)%2Cresize(0%2C390)",url:"https://playerservices.streamtheworld.com/api/livestream-redirect/XHVAYFMAAC.aac"},
+{id:'mx21',cc:'MX',name:"Mix 92.7 FM Puerto Vallarta",genre:'Танцевальная',c:['#FA233B','#FB5C74'],logo:"https://i.iheart.com/v3/re/new_assets/5e55c5f1f2e817641ab904b2?ops=fit(960%2C960)%2Cresize(0%2C390)",url:U[0]+"XHVAYFMAAC.aac"},
 {id:'mx22',cc:'MX',name:"EL FONÓGRAFO: Música Ligada a tu Recuerdo",genre:'Ретро',c:['#BF5AF2','#FF2D92'],logo:"https://cdn-profiles.tunein.com/s16514/images/logod.jpg",url:"https://15723.live.streamtheworld.com:443/XEN_AMAAC.aac"},
-{id:'mx23',cc:'MX',name:"90S DANCE by Mix: Dance de los 90",genre:'Танцевальная',c:['#11998E','#38EF7D'],logo:"https://i.iheart.com/v3/re/new_assets/5c769b2fe7770a23546c3d7f",url:"https://playerservices.streamtheworld.com/api/livestream-redirect/ACIR11_s01AAC.aac"},
+{id:'mx23',cc:'MX',name:"90S DANCE by Mix: Dance de los 90",genre:'Танцевальная',c:['#11998E','#38EF7D'],logo:"https://i.iheart.com/v3/re/new_assets/5c769b2fe7770a23546c3d7f",url:U[0]+"ACIR11_s01AAC.aac"},
 {id:'mx24',cc:'MX',name:"XEAB - Canal 58",genre:'Ретро',c:['#00B4DB','#0083B0'],logo:"https://www.radio-en-vivo.mx/favicon.ico",url:"https://streaming.servicioswebmx.com/8266/stream"},
-{id:'mx25',cc:'MX',name:"XEH 1420 - Antologia Vallenata",genre:'Латина',c:['#E5446D','#3A1C71'],logo:"https://i.iheart.com/v3/re/new_assets/7dcdd442-e119-4245-8877-09872e290fcc?ops=fit(960%2C960)%2Cresize(0%2C390)",url:"https://playerservices.streamtheworld.com/api/livestream-redirect/XEH_AMAAC.aac"},
-{id:'mx26',cc:'MX',name:"AZUL 89: El Color de la Música",genre:'Разное',c:['#F953C6','#B91D73'],logo:"https://i.iheart.com/v3/re/new_assets/5bc5ed95c7977ca1c9302289",url:"https://playerservices.streamtheworld.com/api/livestream-redirect/ACIR24_s01AAC.aac"},
+{id:'mx25',cc:'MX',name:"XEH 1420 - Antologia Vallenata",genre:'Латина',c:['#E5446D','#3A1C71'],logo:"https://i.iheart.com/v3/re/new_assets/7dcdd442-e119-4245-8877-09872e290fcc?ops=fit(960%2C960)%2Cresize(0%2C390)",url:U[0]+"XEH_AMAAC.aac"},
+{id:'mx26',cc:'MX',name:"AZUL 89: El Color de la Música",genre:'Разное',c:['#F953C6','#B91D73'],logo:"https://i.iheart.com/v3/re/new_assets/5bc5ed95c7977ca1c9302289",url:U[0]+"ACIR24_s01AAC.aac"},
 {id:'mx27',cc:'MX',name:"Azteka Radio",genre:'Латина',c:['#00E676','#00B0FF'],logo:"https://static2.mytuner.mobi/media/tvos_radios/NBY6Xuj4aj.jpg",url:"https://streamingcwsradio30.com/8176/;"},
 {id:'mx28',cc:'MX',name:"CHILANGO RADIO: La Radio Que Viene, Viene",genre:'Рок',c:['#FA233B','#FB5C74'],logo:"https://i.iheart.com/v3/re/assets.streams/68507f96166c04a064910e82",url:"https://stream.radio.co/s938b68214/listen"},
-{id:'mx29',cc:'MX',name:"Radio Disney Mexico",genre:'Разное',c:['#00C7BE','#0A84FF'],logo:"https://mx.radiodisney.com/_next/image?url=%2F_next%2Fstatic%2Fmedia%2FLogoPlayer.217fc174.png&w=320&q=75",url:"https://playerservices.streamtheworld.com/api/livestream-redirect/XHFOFMAAC.aac"},
+{id:'mx29',cc:'MX',name:"Radio Disney Mexico",genre:'Разное',c:['#00C7BE','#0A84FF'],logo:"https://mx.radiodisney.com/_next/image?url=%2F_next%2Fstatic%2Fmedia%2FLogoPlayer.217fc174.png&w=320&q=75",url:U[0]+"XHFOFMAAC.aac"},
 {id:'mx30',cc:'MX',name:"Radiomaya",genre:'Разное',c:['#FF9F0A','#FF375F'],logo:"https://telegram.org/img/apple-touch-icon.png",url:"https://myradio24.org/edwyonz"},
 {id:'mx31',cc:'MX',name:"ADN 92.1 FM",genre:'Поп',c:['#FF6A00','#FA233B'],logo:"https://static.wixstatic.com/media/6d3b50_217693c18f4243ed830607f42f35e4ca~mv2.png/v1/fill/w_697,h_428,al_c,q_85,usm_0.66_1.00_0.01,enc_auto/6d3b50_217693c18f4243ed830607f42f35e4ca~mv2.png",url:"https://streamingcwsradio30.com/8322/stream"},
 {id:'mx32',cc:'MX',name:"Viva El Mariachi Radio",genre:'Фолк',c:['#FF2D55','#7A3CFF'],logo:"https://zeno.fm/_ipx/f_webp&q_85&fit_cover&s_144x144/https://images.zeno.fm/hcRV8CEGaG8Vk2Shiuxw5Jm7b76n90K6teDAzQz0QXA/rs:fill:288:288/g:ce:0:0/aHR0cHM6Ly9wcm94eS56ZW5vLmZtL2NvbnRlbnQvc3RhdGlvbnMvYWd4emZucGxibTh0YzNSaGRITnlNZ3NTQ2tGMWRHaERiR2xsYm5RWWdJQ0FrT3Z6M3drTUN4SU9VM1JoZEdsdmJsQnliMlpwYkdVWWdJQ1EtYWJINHdrTW9nRUVlbVZ1YncvaW1hZ2UvP3U9MTY3MTgzMTYyMTAwMA.webp",url:"https://stream.zenolive.com/sy87dubz5f5tv"},
-{id:'mx33',cc:'MX',name:"RADIO FELICIDAD: Los Mejores Momentos",genre:'Ретро',c:['#11998E','#38EF7D'],logo:"https://i.postimg.cc/MpjBZP9H/radio-felicidad.jpg",url:"https://playerservices.streamtheworld.com/api/livestream-redirect/XEFRAMAAC.aac"},
+{id:'mx33',cc:'MX',name:"RADIO FELICIDAD: Los Mejores Momentos",genre:'Ретро',c:['#11998E','#38EF7D'],logo:"https://i.postimg.cc/MpjBZP9H/radio-felicidad.jpg",url:U[0]+"XEFRAMAAC.aac"},
 {id:'mx34',cc:'MX',name:"Vintage 94.1 HD2 Culiacán",genre:'Танцевальная',c:['#FF2D55','#7A3CFF'],logo:"https://blob.luznoticias.mx/img/rediseno/vintage941.png",url:"https://audiostreaming.luz.network/stream/8/;"},
 {id:'mx35',cc:'MX',name:"stereo uno",genre:'Новости',c:['#DA4453','#89216B'],logo:"https://www.luznoticias.mx/xstatic/luznoticias/images/icons/favicon.png",url:"https://audiostreaming.luz.network/stream/13/"},
-{id:'mx36',cc:'MX',name:"BEAT: Total Music",genre:'Танцевальная',c:['#5AC8FA','#0A84FF'],logo:"https://i.postimg.cc/C15C4837/beat-2025.jpg",url:"https://playerservices.streamtheworld.com/api/livestream-redirect/XHSONFMAAC.aac"},
-{id:'mx37',cc:'MX',name:"PA BAILAR: Banda y grupera para la fiesta",genre:'Латина',c:['#DA4453','#89216B'],logo:"https://i.iheart.com/v3/re/assets.streams/68cf4e9742d32d36188fbbc4",url:"https://playerservices.streamtheworld.com/api/livestream-redirect/ACIR08_s01AAC.aac"},
-{id:'mx38',cc:'MX',name:"UNIVERSAL: La Estación de los Clásicos",genre:'Поп',c:['#64D2FF','#5E5CE6'],logo:"https://cdn-profiles.tunein.com/s1171/images/logog.png",url:"https://playerservices.streamtheworld.com/api/livestream-redirect/XHFO_FMAAC.aac"},
+{id:'mx36',cc:'MX',name:"BEAT: Total Music",genre:'Танцевальная',c:['#5AC8FA','#0A84FF'],logo:"https://i.postimg.cc/C15C4837/beat-2025.jpg",url:U[0]+"XHSONFMAAC.aac"},
+{id:'mx37',cc:'MX',name:"PA BAILAR: Banda y grupera para la fiesta",genre:'Латина',c:['#DA4453','#89216B'],logo:"https://i.iheart.com/v3/re/assets.streams/68cf4e9742d32d36188fbbc4",url:U[0]+"ACIR08_s01AAC.aac"},
+{id:'mx38',cc:'MX',name:"UNIVERSAL: La Estación de los Clásicos",genre:'Поп',c:['#64D2FF','#5E5CE6'],logo:"https://cdn-profiles.tunein.com/s1171/images/logog.png",url:U[0]+"XHFO_FMAAC.aac"},
 {id:'mx39',cc:'MX',name:"Lokura FM Rock Ciudad De México 830 AM",genre:'Рок',c:['#E5446D','#3A1C71'],logo:"https://ott-assets.mdstrm.com/692edd869a67b2f5fb063c6d/693999296795b30e4e953865/assets/Logo_Landscape_Header.png?auto=format,compress&h=48",url:"https://mdstrm.com/audio/69373baa6d5fd824ec8440c5/live.m3u8",type:'hls'},
-{id:'mx40',cc:'MX',name:"Match 89.5 FM Puerto Vallarta",genre:'Танцевальная',c:['#5E5CE6','#FF2D92'],logo:"https://i.iheart.com/v3/re/new_assets/6294edb231e1c81edc5d1df9?ops=fit(960%2C960)%2Cresize(0%2C390)",url:"https://playerservices.streamtheworld.com/api/livestream-redirect/XHMEFMAAC.aac"},
-{id:'mx41',cc:'MX',name:"estéreo vida 95.3 Tepic",genre:'Латина',c:['#FFD60A','#1D3A6E'],logo:"https://radioramanayarit.mx/img/stereovida.png?v2",url:"https://stream.zeno.fm/xx20nxypu98uv"},
+{id:'mx40',cc:'MX',name:"Match 89.5 FM Puerto Vallarta",genre:'Танцевальная',c:['#5E5CE6','#FF2D92'],logo:"https://i.iheart.com/v3/re/new_assets/6294edb231e1c81edc5d1df9?ops=fit(960%2C960)%2Cresize(0%2C390)",url:U[0]+"XHMEFMAAC.aac"},
+{id:'mx41',cc:'MX',name:"estéreo vida 95.3 Tepic",genre:'Латина',c:['#FFD60A','#1D3A6E'],logo:"https://radioramanayarit.mx/img/stereovida.png?v2",url:U[6]+"xx20nxypu98uv"},
 {id:'mx42',cc:'MX',name:"Vintage 101.3 HD2 Los Mochis",genre:'Ретро',c:['#64D2FF','#5E5CE6'],logo:"https://blob.luznoticias.mx/img/rediseno/vintage1013.png",url:"https://audiostreaming.luz.network/stream/2/;"},
-{id:'mx43',cc:'MX',name:"DISCO by Mix: El playlist de la discoteca",genre:'Танцевальная',c:['#FF375F','#BF5AF2'],logo:"https://i.iheart.com/v3/re/new_assets/5c76a223e7770a23546c3d81",url:"https://playerservices.streamtheworld.com/api/livestream-redirect/ACIR14_s01AAC.aac"},
+{id:'mx43',cc:'MX',name:"DISCO by Mix: El playlist de la discoteca",genre:'Танцевальная',c:['#FF375F','#BF5AF2'],logo:"https://i.iheart.com/v3/re/new_assets/5c76a223e7770a23546c3d81",url:U[0]+"ACIR14_s01AAC.aac"},
 {id:'mx44',cc:'MX',name:"W Radio Morelos 100.1",genre:'Новости',c:['#E5446D','#3A1C71'],logo:"https://wradiomorelos.com/wp-content/uploads/2024/02/cropped-W-Radio-Morelos-2-120x120.png",url:"https://stream9.mexiserver.com:8342/steam"},
 {id:'mx45',cc:'MX',name:"San Juan FM 96.1 San Juan de los lagos",genre:'Латина',c:['#FF2D55','#7A3CFF'],logo:"https://grupozer.mx/images/portada/logos/403.png",url:"https://live.zuperdns.net/6961/stream/;stream.mp3"},
-{id:'mx46',cc:'MX',name:"W RADIO: Si es Radio, es W",genre:'Разное',c:['#F953C6','#B91D73'],logo:"https://cdn-profiles.tunein.com/s16553/images/logod.jpg",url:"https://playerservices.streamtheworld.com/api/livestream-redirect/W_RADIOAAC.aac"},
+{id:'mx46',cc:'MX',name:"W RADIO: Si es Radio, es W",genre:'Разное',c:['#F953C6','#B91D73'],logo:"https://cdn-profiles.tunein.com/s16553/images/logod.jpg",url:U[0]+"W_RADIOAAC.aac"},
 {id:'mx47',cc:'MX',name:"¡Que Viva México!",genre:'Поп',c:['#DA4453','#89216B'],logo:F('www.quevivamexico.com/'),url:"https://panel.retrolandigital.com/listen/que_viva_mexico/listen"},
 {id:'mx48',cc:'MX',name:"Roca Fm Clasicos Mexico",genre:'Ретро',c:['#8A3BE8','#E01B6A'],logo:F('www.rocafm.eu/'),url:"https://xxdelgado.radioca.st/"},
 {id:'mx50',cc:'MX',name:"BOLLOCKS Rock & Metal Radio",genre:'Рок',c:['#00C7BE','#0A84FF'],logo:"https://u.jimcdn.com/cms/o/s924f1217ff669ab4/img/favicon.png?t=1504408222",url:"https://s44.myradiostream.com/6588/;?type=http&nocache=1571393528?0.9592127816686777"},
@@ -1591,13 +1654,13 @@ const STATIONS=[
 {id:'mx57',cc:'MX',name:"Radio Variedades 103.5 FM Los Mochis",genre:'Латина',c:['#30D158','#0A84FF'],logo:F('zeno.fm/'),url:"https://radios.blumhost.es/8126/;"},
 {id:'mx58',cc:'MX',name:"España FM 92.9",genre:'Поп',c:['#00C7BE','#0A84FF'],logo:F('xhunesfm.unes.edu.mx/'),url:"https://sh4.radioonlinehd.com:8526/stream"},
 {id:'mx59',cc:'MX',name:"Kiuu - 91.1 FM",genre:'Новости',c:['#0A84FF','#5E5CE6'],url:"https://streamingcwsradio30.com/8232/stream"},
-{id:'mx60',cc:'MX',name:"Romántica 101.9 Tepic",genre:'Латина',c:['#DA4453','#89216B'],url:"https://stream.zeno.fm/wfz2auypu98uv"},
-{id:'mx61',cc:'MX',name:"88.9 Noticias ACIR",genre:'Новости',c:['#FF2D55','#7A3CFF'],logo:F('www.iheart.com/'),url:"https://playerservices.streamtheworld.com/api/livestream-redirect/XHMFMAAC_SC.aac"},
+{id:'mx60',cc:'MX',name:"Romántica 101.9 Tepic",genre:'Латина',c:['#DA4453','#89216B'],url:U[6]+"wfz2auypu98uv"},
+{id:'mx61',cc:'MX',name:"88.9 Noticias ACIR",genre:'Новости',c:['#FF2D55','#7A3CFF'],logo:F('www.iheart.com/'),url:U[0]+"XHMFMAAC_SC.aac"},
 {id:'mx62',cc:'MX',name:"Usagi FM 102.9",genre:'Аниме',c:['#8A3BE8','#E01B6A'],logo:F('usagifm.com/'),url:"https://agad.usagifm.com/listen/usagifm/radio.mp3"},
-{id:'es1',cc:'ES',name:"LOS 40 Principales España",genre:'Поп',c:['#FF9F0A','#FF375F'],logo:"https://los40es00.epimg.net/iconos/v1.x/v1.0/touch-apple.png",url:"https://playerservices.streamtheworld.com/api/livestream-redirect/Los40.mp3"},
-{id:'es2',cc:'ES',name:"Los 40 Urban",genre:'Танцевальная',c:['#64D2FF','#5E5CE6'],logo:"https://los40es00.epimg.net/iconos/v1.x/v1.0/promos/promo_og_los40.png",url:"https://playerservices.streamtheworld.com/api/livestream-redirect/LOS40_URBAN.mp3"},
+{id:'es1',cc:'ES',name:"LOS 40 Principales España",genre:'Поп',c:['#FF9F0A','#FF375F'],logo:"https://los40es00.epimg.net/iconos/v1.x/v1.0/touch-apple.png",url:U[0]+"Los40.mp3"},
+{id:'es2',cc:'ES',name:"Los 40 Urban",genre:'Танцевальная',c:['#64D2FF','#5E5CE6'],logo:"https://los40es00.epimg.net/iconos/v1.x/v1.0/promos/promo_og_los40.png",url:U[0]+"LOS40_URBAN.mp3"},
 {id:'es3',cc:'ES',name:"Café del Mar",genre:'Чилл',c:['#FFB800','#FF5E3A'],logo:LG.cafedelmar,url:"https://streams.radio.co/se1a320b47/listen"},
-{id:'es4',cc:'ES',name:"LOS40 Classic",genre:'Рок',c:['#DA4453','#89216B'],logo:"https://los40es00.epimg.net/estaticos/recursosgraficos/v1/img/app/los40_192.png",url:"https://playerservices.streamtheworld.com/api/livestream-redirect/LOS40_CLASSIC.mp3"},
+{id:'es4',cc:'ES',name:"LOS40 Classic",genre:'Рок',c:['#DA4453','#89216B'],logo:"https://los40es00.epimg.net/estaticos/recursosgraficos/v1/img/app/los40_192.png",url:U[0]+"LOS40_CLASSIC.mp3"},
 {id:'es5',cc:'ES',name:"ONDA CERO",genre:'Новости',c:['#00E676','#00B0FF'],logo:F('www.radio.es/'),url:"https://atres-live.ondacero.es/live/ondacero/bitrate_1.m3u8",type:'hls'},
 {id:'es6',cc:'ES',name:"24h RTVE Televisión",genre:'Разное',c:['#FFD60A','#1D3A6E'],logo:"https://img2.rtve.es/imagenes/directo-elecciones-cataluna/1504082563113.jpg",url:"https://ztnr.rtve.es/ztnr/1694255.m3u8",type:'hls'},
 {id:'es7',cc:'ES',name:"Catalunya Informació",genre:'Новости',c:['#00E676','#00B0FF'],logo:"https://statics.ccma.cat/img/favicons/catinfo-favicon-96x96.png",url:"https://shoutcast.ccma.cat/ccma/catalunyainformacioHD.mp3"},
@@ -1607,8 +1670,8 @@ const STATIONS=[
 {id:'es11',cc:'ES',name:"Flaix FM",genre:'Танцевальная',c:['#FA233B','#FB5C74'],logo:"https://flaixfm.cat/favicon.ico",url:"https://stream.flaixfm.cat/icecast"},
 {id:'es12',cc:'ES',name:"COPE Albacete",genre:'Разное',c:['#F953C6','#B91D73'],logo:"https://www.cope.es/favicon/cope/apple-touch-icon-192x192.png",url:"https://wecast11-o-cloud.flumotion.com/copesedes/albacete.mp3"},
 {id:'es13',cc:'ES',name:"Onda Cero Gijón",genre:'Разное',c:['#64D2FF','#5E5CE6'],logo:"https://static.ondacero.es/img/favicon.ico",url:"https://atres-live.ondacero.es/live/delegaciones/oc/gijon/bitrate_1.m3u8",type:'hls'},
-{id:'es14',cc:'ES',name:"RAC1 +1",genre:'Новости',c:['#FF375F','#BF5AF2'],logo:"https://www.rac1.cat/apple-touch-icon-120x120.png",url:"https://playerservices.streamtheworld.com/api/livestream-redirect/RAC_MES_1.mp3"},
-{id:'es15',cc:'ES',name:"Cadena SER - Ràdio Barcelona",genre:'Новости',c:['#DA4453','#89216B'],logo:"https://cadenaser00.epimg.net/favicon.png",url:"https://playerservices.streamtheworld.com/api/livestream-redirect/SER_BARCELONA.mp3"},
+{id:'es14',cc:'ES',name:"RAC1 +1",genre:'Новости',c:['#FF375F','#BF5AF2'],logo:"https://www.rac1.cat/apple-touch-icon-120x120.png",url:U[0]+"RAC_MES_1.mp3"},
+{id:'es15',cc:'ES',name:"Cadena SER - Ràdio Barcelona",genre:'Новости',c:['#DA4453','#89216B'],logo:"https://cadenaser00.epimg.net/favicon.png",url:U[0]+"SER_BARCELONA.mp3"},
 {id:'es16',cc:'ES',name:"Cadena 100",genre:'Поп',c:['#12C2E9','#C471ED'],logo:LG.cadena100,url:"https://cadena100-cope.flumotion.com/chunks.m3u8",type:'hls'},
 {id:'es17',cc:'ES',name:"Canarias Radio",genre:'Разное',c:['#5AC8FA','#0A84FF'],logo:"https://rtvc.es/archivos/2021/03/c144.png",url:"https://rtvc-radio.flumotion.com/rtvc-radio/radio1-high.mp3"},
 {id:'es18',cc:'ES',name:"Cadena100",genre:'Разное',c:['#0A84FF','#5E5CE6'],logo:LG.cadena100,url:"https://cadena100-cope.flumotion.com/playlist.m3u8",type:'hls'},
@@ -1620,7 +1683,7 @@ const STATIONS=[
 {id:'es24',cc:'ES',name:"esRadio Madrid",genre:'Разное',c:['#FF2D55','#7A3CFF'],logo:"https://s.libertaddigital.com/images/es-radio-directo.jpg",url:"https://libertaddigital-radio-live1.flumotion.com/libertaddigital/ld-live1-med.aac"},
 {id:'es25',cc:'ES',name:"Café del Mar CALM",genre:'Танцевальная',c:['#00B4DB','#0083B0'],logo:LG.cafedelmar,url:"https://streamer.radio.co/sb748f24ad/listen"},
 {id:'es26',cc:'ES',name:"Kiss-FM Madrid",genre:'Разное',c:['#11998E','#38EF7D'],logo:"https://www.kissfm.es/wp-content/uploads/2022/03/cropped-LOGOS_KISSFM20_CC_CMYK_Logo-KISS-FM-20-Negativo-Color-1.png",url:"https://kissfm.kissfmradio.cires21.com/kissfm.mp3"},
-{id:'es27',cc:'ES',name:"RAC105",genre:'Поп',c:['#BF5AF2','#FF2D92'],logo:"https://www.rac105.cat/favicon.ico",url:"https://playerservices.streamtheworld.com/api/livestream-redirect/RAC105.mp3"},
+{id:'es27',cc:'ES',name:"RAC105",genre:'Поп',c:['#BF5AF2','#FF2D92'],logo:"https://www.rac105.cat/favicon.ico",url:U[0]+"RAC105.mp3"},
 {id:'es28',cc:'ES',name:"Muy buena",genre:'Разное',c:['#64D2FF','#5E5CE6'],logo:"https://media.emisorasmusicales.net/wp-content/uploads/2020/03/04135742/MuyBuena-1-1.svg",url:"https://stream.emisorasmusicales.net/listen/muybuena/muybuena.mp3"},
 {id:'es29',cc:'ES',name:"Blue Marlin Ibiza",genre:'Танцевальная',c:['#8A3BE8','#E01B6A'],logo:"https://www.bluemarlinibiza.com/wp-content/themes/bluemarlinibiza/favicon64.png",url:"https://ibizasonica.streaming-pro.com:8001/bluemarlin"},
 {id:'es30',cc:'ES',name:"Radio Remember Last",genre:'Разное',c:['#30D158','#0A84FF'],logo:"https://static.mytuner.mobi/media/tvos_radios/ru5ejprwrdd5.png",url:"https://node-25.zeno.fm/5nvz43btqg8uv?rj-ttl=5&rj-tok=AAABd24dwXQAYQSRcz9whBAeXA"},
@@ -1629,8 +1692,8 @@ const STATIONS=[
 {id:'es33',cc:'ES',name:"RNE Radio 5 Valencia",sub:"RTVE · новости · Валенсия",genre:'Разное',c:['#64D2FF','#5E5CE6'],logo:"https://img2.rtve.es/a/3894731/square/?h=320",url:"https://f131.rndfnk.com/star/crtve/rne5/vlc/mp3/128/stream.mp3?cid=01GEP70HQKHM3WJB5GHG662KX3&sid=2HgIGK1NtDDUVhSnKN9RWpCUKWE&token=r4st34giurxRWd0CMkMBmwayGa2nB6j_aUgMn_xD7vs&tvf=RH0CSKN9KBdmMTMxLnJuZGZuay5jb20"},
 {id:'es34',cc:'ES',name:"80 Exitos",genre:'Танцевальная',c:['#FFD60A','#1D3A6E'],logo:F('musica80.radioclub.es/'),url:"https://80sexitos.stream.laut.fm/80sexitos"},
 {id:'es35',cc:'ES',name:"Pure Ibiza Radio",genre:'Танцевальная',c:['#FFB800','#FF5E3A'],logo:F('www.pureibizaradio.com/'),url:"https://pureibizaradio.clubbingradios.com:9518/PureIbizaRadio"},
-{id:'es36',cc:'ES',name:"Radio Marca Madrid",genre:'Спорт',c:['#64D2FF','#5E5CE6'],logo:F('www.marca.com/'),url:"https://playerservices.streamtheworld.com/api/livestream-redirect/RADIOMARCA_NACIONAL_SC"},
-{id:'es37',cc:'ES',name:"RAC1",genre:'Юмор',c:['#5AC8FA','#0A84FF'],logo:F('www.rac1.cat/'),url:"https://playerservices.streamtheworld.com/api/livestream-redirect/RAC_1.mp3"},
+{id:'es36',cc:'ES',name:"Radio Marca Madrid",genre:'Спорт',c:['#64D2FF','#5E5CE6'],logo:F('www.marca.com/'),url:U[0]+"RADIOMARCA_NACIONAL_SC"},
+{id:'es37',cc:'ES',name:"RAC1",genre:'Юмор',c:['#5AC8FA','#0A84FF'],logo:F('www.rac1.cat/'),url:U[0]+"RAC_1.mp3"},
 {id:'es38',cc:'ES',name:"Radio España",genre:'Новости',c:['#00C7BE','#0A84FF'],url:"https://stream-280.surfernetwork.com/7ywx2u45vv8uv?zt=eyJhbGciOiJIUzI1NiJ9.eyJzdHJlYW0iOiI3eXd4MnU0NXZ2OHV2IiwiaG9zdCI6InN0cmVhbS0yODAuc3VyZmVybmV0d29yay5jb20iLCJ0bSI6ZmFsc2UsInJ0dGwiOjUsImp0aSI6IlpuX1JsbmFsUW1lczZoNnVHM1ZSVFEiLCJpYXQiOjE3OTI2MjA0MTMsImV4cCI6MTc5MjYyMDQ3M30.r-tEBQJH4Ousqw2wByzIENf6havjD5aaMkyC2BSp0-0"},
 {id:'es39',cc:'ES',name:"Remember the music FM 96.6",genre:'Танцевальная',c:['#FF375F','#BF5AF2'],logo:F('rememberthemusicfm.com/'),url:"https://eu1.lhdserver.es:9041/stream"},
 {id:'es40',cc:'ES',name:"Radio Planeta Costa del Sol",genre:'Танцевальная',c:['#12C2E9','#C471ED'],logo:F('www.radioplaneta.com/'),url:"https://radioplaneta.emitironline.com/radio"},
@@ -1639,7 +1702,7 @@ const STATIONS=[
 {id:'es43',cc:'ES',name:"EsRadio Principal",genre:'Новости',c:['#00E676','#00B0FF'],logo:F('esradio.libertaddigital.com/'),url:"https://libertaddigital-radio-live1.flumotion.com/libertaddigital/ld-live1-low.mp3"},
 {id:'es44',cc:'ES',name:"LOVE RADIO - LOVE.radio",genre:'Латина',c:['#FA233B','#FB5C74'],logo:F('love.radio/'),url:"https://loveradio.streamingmedia.it/espana"},
 {id:'es45',cc:'ES',name:"Intimidad Relax",genre:'Чилл',c:['#FF375F','#BF5AF2'],logo:F('intimidadradio.com/'),url:"https://eu1.lhdserver.es:9121/stream"},
-{id:'es46',cc:'ES',name:"Radio Nature",genre:'Чилл',c:['#00C7BE','#0A84FF'],logo:F('radionature.weebly.com/'),url:"https://stream.zeno.fm/3ac97ysh6f0uv.aac"},
+{id:'es46',cc:'ES',name:"Radio Nature",genre:'Чилл',c:['#00C7BE','#0A84FF'],logo:F('radionature.weebly.com/'),url:U[6]+"3ac97ysh6f0uv.aac"},
 {id:'es47',cc:'ES',name:"Radio Libertad",genre:'Разное',c:['#FFB800','#FF5E3A'],logo:F('radiolibertad.es/'),url:"https://server9.emitironline.com:19482/stream?cb=1708722000350"},
 {id:'es48',cc:'ES',name:"1 Slow-Radio - laut.fm",genre:'Чилл',c:['#00C7BE','#0A84FF'],logo:F('laut.fm/'),url:"https://1slowradio.stream.laut.fm/1_slowradio"},
 {id:'es49',cc:'ES',name:"Loca Progressive House",genre:'Танцевальная',c:['#30D158','#0A84FF'],logo:F('www.locafm.com/'),url:"https://s02.fjperezdj.com:8056/live?listening-from-radio-garden=1647634146"},
@@ -1649,11 +1712,11 @@ const STATIONS=[
 {id:'es53',cc:'ES',name:"Misterio FM",genre:'Новости',c:['#0A84FF','#5E5CE6'],url:"https://stream-38.zeno.fm/zr1ntv61fchvv?zs=B6YIARuRSaujjyuQoZxg0g"},
 {id:'es54',cc:'ES',name:"Radio Vilasound Ibiza 92.7 FM",genre:'Танцевальная',c:['#DA4453','#89216B'],logo:F('www.facebook.com/'),url:"https://s9.citrus3.com:8174/stream"},
 {id:'es55',cc:'ES',name:"Mariskal Rock",genre:'Рок',c:['#FF9F0A','#FF375F'],logo:F('mariskalrock.com/'),url:"https://media.profesionalhosting.com:8047/stream"},
-{id:'es56',cc:'ES',name:"Kiss Music FM",genre:'Поп',c:['#00C7BE','#0A84FF'],url:"https://stream.zeno.fm/aq899a53rs8uv"},
+{id:'es56',cc:'ES',name:"Kiss Music FM",genre:'Поп',c:['#00C7BE','#0A84FF'],url:U[6]+"aq899a53rs8uv"},
 {id:'es57',cc:'ES',name:"Radio Humor FM",genre:'Юмор',c:['#FF375F','#BF5AF2'],logo:F('radiohumorfm.com/'),url:"https://stream.radiohumorfm.com/stream"},
 {id:'es58',cc:'ES',name:"FlaixBAC",genre:'Поп',c:['#FFB800','#FF5E3A'],logo:F('www.flaixbac.cat/'),url:"https://stream.flaixbac.cat/icecast"},
 {id:'es59',cc:'ES',name:"Ibiza Stardust Radio",genre:'Танцевальная',c:['#8A3BE8','#E01B6A'],url:"https://www.radioking.com/play/ibiza-stardust-radio-1"},
-{id:'es60',cc:'ES',name:"Hitz 90s FM",genre:'Классика',c:['#F953C6','#B91D73'],url:"https://stream.zeno.fm/1q3dwmd6yf8uv"},
+{id:'es60',cc:'ES',name:"Hitz 90s FM",genre:'Классика',c:['#F953C6','#B91D73'],url:U[6]+"1q3dwmd6yf8uv"},
 {id:'es61',cc:'ES',name:"Funky Corner Radio",genre:'Танцевальная',c:['#BF5AF2','#FF2D92'],url:"https://ais-sa2.cdnstream1.com/2447_96.aac"},
 {id:'es62',cc:'ES',name:"Radio Esport Valencia",genre:'Спорт',c:['#00B4DB','#0083B0'],logo:F('radioesport914.com/'),url:"https://streaming.radioesport914.com:58000/stream"},
 {id:'funkids',cc:'GB',name:"Fun Kids",sub:"Детские хиты · DAB Лондон",genre:'Детское',c:['#FF2D55','#FF9F0A'],logo:LG.funkidslive,url:"https://listen-funkids.sharp-stream.com/funkids.mp3"},
@@ -1675,7 +1738,7 @@ const STATIONS=[
 {id:'naxikids',cc:'RS',name:"Naxi Kids",sub:"Белград · песни и игры",genre:'Детское',c:['#30D158','#FFD60A'],url:"https://naxidigital-kids128ssl.streaming.rs:8052/;"},
 {id:'hallokids',cc:'NL',name:"Hallo Kids",sub:"Нидерланды · музыка и шуточки",genre:'Детское',c:['#FF9F0A','#64D2FF'],url:"https://stream.hallokidsradio.nl/hallokids"},
 {id:'sleepbaby',cc:'AE',name:"Sleep Baby",sub:"Колыбельные и звуки ночи",genre:'Детское',c:['#5E5CE6','#64D2FF'],url:"https://streaming.positivity.radio/pr/sleepbaby/icecast.audio"},
-{id:'bbc4x',cc:'GB',name:"BBC Radio 4 Extra",sub:"Архив BBC · комедии и драмы",genre:'Ностальгия',c:['#E8A64C','#7A3B2E'],logo:LG.bbc,url:"https://as-hls-ww-live.akamaized.net/pool_26173715/live/ww/bbc_radio_four_extra/bbc_radio_four_extra.isml/bbc_radio_four_extra-audio%3d96000.norewind.m3u8",type:'hls'},
+{id:'bbc4x',cc:'GB',name:"BBC Radio 4 Extra",sub:"Архив BBC · комедии и драмы",genre:'Ностальгия',c:['#E8A64C','#7A3B2E'],logo:LG.bbc,url:U[3]+"pool_26173715/live/ww/bbc_radio_four_extra/bbc_radio_four_extra.isml/bbc_radio_four_extra-audio%3d96000.norewind.m3u8",type:'hls'},
 {id:'walmotr',cc:'US',name:"Old Time Radio",sub:"WALM · радиоспектакли 1930–50-х",genre:'Ностальгия',c:['#C98A4B','#5E4A2E'],url:"https://icecast.walmradio.com:8443/otr"},
 {id:'britcom3',cc:'GB',name:"BritCom",sub:"Pumpkin FM · британские радиокомедии",genre:'Ностальгия',c:['#D6B25E','#7A5E2E'],url:"https://cast2.asurahosting.com/proxy/britcom3/stream"},
 {id:'fm1940s',cc:'GB',name:"1940s Radio",sub:"Home Service · дух сороковых",genre:'Ностальгия',c:['#B25E3C','#5E2E1E'],url:"https://cast2.asurahosting.com/proxy/1940sradio/stream"},
@@ -1741,7 +1804,15 @@ const SHELVES=[
 ];
 const GENRES=["Все","Поп","Рок","Ностальгия","Детское","Юмор","Латина","Ретро","Танцевальная","Хип-хоп","Чилл","Классика","Новости","Спорт","Разное","Джаз","Фолк","Кантри","Аниме"];
 
-/* ==================== STATE ==================== */
+/* ==================== НАСТРОЙКИ ====================
+   LOGO_DEV_KEY — публичный ключ (pk_…) с logo.dev: логотипы до 512 px вместо 256 px из Google.
+   Пусто — отключено, приложение работает как раньше. Крупный логотип конкретной станции можно
+   задать и вручную полем hd:"https://…" в данных станции.
+   Мост HertzNative существует только в Android-оболочке (APK) */
+const LOGO_DEV_KEY='';
+const NATIVE=window.HertzNative||null;
+
+/* ==================== STATE ====================
 /* Префикс ключей «ukRadio.» сохранён: иначе пользователи потеряют избранное и настройки */
 const LS={get(k,d){try{const v=localStorage.getItem('ukRadio.'+k);return v?JSON.parse(v):d}catch(e){return d}},set(k,v){try{localStorage.setItem('ukRadio.'+k,JSON.stringify(v))}catch(e){}}};
 const $=s=>document.querySelector(s);
@@ -1765,7 +1836,7 @@ const initialsOf=name=>{
   return m||'♪';
 };
 /* MIME для artwork по расширению */
-const artType=u=>/\.svg(\?|$)/i.test(u)?'image/svg+xml':/\.jpe?g(\?|$)/i.test(u)?'image/jpeg':/\.gif(\?|$)/i.test(u)?'image/gif':/\.webp(\?|$)/i.test(u)?'image/webp':'image/png';
+const artType=u=>/^data:image\/svg|\.svg(\?|$)/i.test(u)?'image/svg+xml':/\.jpe?g(\?|$)/i.test(u)?'image/jpeg':/\.gif(\?|$)/i.test(u)?'image/gif':/\.webp(\?|$)/i.test(u)?'image/webp':'image/png';
 /* Поиск: без регистра и диакритики, все слова запроса должны встретиться.
    Индекс строится один раз (имя+подзаголовок+жанр+страна+алиасы) */
 const norm=s=>s.toLowerCase().normalize('NFD').replace(/\p{M}/gu,'');
@@ -1785,6 +1856,31 @@ function toast(msg){
 const imgDone=(e,ok)=>{const i=e.target;if(i.tagName!=='IMG')return;i.classList.toggle('ok',ok);if(i.parentElement)i.parentElement.classList.remove('sk')};
 document.addEventListener('load',e=>imgDone(e,true),true);
 document.addEventListener('error',e=>imgDone(e,false),true);
+
+/* ==================== HD-ЛОГОТИПЫ ====================
+   Google-фавиконка отдаёт максимум 256 px. Для обложки Now Playing ищем крупнее: hd станции или logo.dev
+   (по домену из ссылки на фавиконку). Берём, только если картинка реально больше 256 px; находки кэшируются */
+const HD=new Map(Object.entries(LS.get('hd',{}))),HD_MISS=new Set();
+const siteHost=st=>{const m=st.logo&&st.logo.match(/[?&]url=([^&]+)/);try{return m?new URL(decodeURIComponent(m[1])).hostname.replace(/^www\d*\./,''):''}catch(e){return ''}};
+function hdUrl(st){
+  if(st.hd)return st.hd;
+  const h=siteHost(st);
+  return LOGO_DEV_KEY&&h?`https://img.logo.dev/${h}?token=${LOGO_DEV_KEY}&size=512&format=png&fallback=404`:'';
+}
+function findHd(st){
+  if(HD.has(st.id))return Promise.resolve(HD.get(st.id));
+  const u=hdUrl(st);
+  if(!u||HD_MISS.has(st.id))return Promise.resolve(null);
+  return new Promise(res=>{
+    const i=new Image();
+    i.onload=()=>{
+      if(i.naturalWidth>256){HD.set(st.id,u);LS.set('hd',Object.fromEntries(HD));res(u)}
+      else{HD_MISS.add(st.id);res(null)}
+    };
+    i.onerror=()=>{HD_MISS.add(st.id);res(null)};
+    i.src=u;
+  });
+}
 
 /* ==================== AUDIO ==================== */
 let audio=new Audio();audio.preload='none';audio.volume=LS.get('vol',.8);
@@ -1914,9 +2010,10 @@ function setPalette(c1,c2,instant,light){
   rs.setProperty('--on-ac',lumOf(ac)>.30?'#17171A':'#FFFFFF');
   /* Now Playing — из тех же h1/h2: одна схема на всё приложение (верх, свечение, низ) */
   const nsat=(s,g)=>g?.06:lt?clampN(s*.9,.5,.85):clampN(s*.7,.34,.62);
-  rs.setProperty('--nc1',toHex(hsl2rgb(h1,nsat(s1,gray),lt?.70:.40)));
-  rs.setProperty('--nc2',toHex(hsl2rgb(h2,nsat(s2,gray),lt?.82:.52)));
-  rs.setProperty('--nc3',toHex(hsl2rgb(h1,nsat(s1,gray),lt?.56:.21)));
+  const ns=nowEl.style; // на самом плеере, а не на :root — анимация цвета не перестилизует весь документ
+  ns.setProperty('--nc1',toHex(hsl2rgb(h1,nsat(s1,gray),lt?.70:.40)));
+  ns.setProperty('--nc2',toHex(hsl2rgb(h2,nsat(s2,gray),lt?.82:.52)));
+  ns.setProperty('--nc3',toHex(hsl2rgb(h1,nsat(s1,gray),lt?.56:.21)));
   nowEl.classList.toggle('lt',lt);
   if(instant){void root.offsetWidth;rs.transition=''}
   PAL.rgb=ac.join(',');PAL.deep=toHex(deep);PAL.pale=toHex(pale);
@@ -1938,34 +2035,42 @@ function updateAmbient(st){
    Нет логотипа — крупная монограмма на градиенте станции */
 let coverFlip=false;
 function setCover(st){
-  const cv=$('#nowCover'),A=$('#coverA'),B=$('#coverB');
+  const cv=$('#nowCover');
   [cv,$('#nowArt')].forEach(x=>{x.style.setProperty('--k1',st.c[0]);x.style.setProperty('--k2',st.c[1])});
   $('#artImg').classList.remove('in'); // новый арт проявится после загрузки
   $('#ncMono').textContent=initialsOf(st.name);
-  const inc=coverFlip?A:B,out=coverFlip?B:A;coverFlip=!coverFlip;
-  const clear=()=>{inc.style.opacity=0;out.style.opacity=0;cv.classList.remove('has');nowEl.classList.remove('art')};
-  if(!st.logo){clear();return}
+  if(!st.logo){showCover(st,'');return}
+  showCover(st,st.logo);
+  findHd(st).then(u=>{if(u&&curId===st.id){showCover(st,u);setMediaMeta(st,NP.cur);nativeSync()}});
+}
+function showCover(st,url){
+  const cv=$('#nowCover'),A=$('#coverA'),B=$('#coverB');
+  const clear=()=>{A.style.opacity=B.style.opacity=0;cv.classList.remove('has');nowEl.classList.remove('art')};
+  if(!url){clear();return}
   const tmp=new Image();
   tmp.onload=()=>{
     if(curId!==st.id)return;
     /* Логотипы-фавиконки (≤256 px) на весь экран мылятся. Растр меньше 480 px показываем как «арт»
-       в натуральный размер на размытом фоне из него же; векторные и крупные — на всю ширину */
-    const vec=/^data:image\/svg|\.svg(\?|$)/i.test(st.logo),art=!vec&&tmp.naturalWidth<480;
+       в натуральный размер; векторные и крупные — на всю ширину с fade */
+    const vec=/^data:image\/svg|\.svg(\?|$)/i.test(url),art=!vec&&tmp.naturalWidth<480;
     nowEl.classList.toggle('art',art);
     if(art){
-      nowEl.style.setProperty('--cv','url('+JSON.stringify(st.logo)+')');
-      const ai=$('#artImg');ai.src=st.logo;requestAnimationFrame(()=>ai.classList.add('in'));
+      const ai=$('#artImg');ai.src=url;requestAnimationFrame(()=>ai.classList.add('in'));
     }
-    inc.src=st.logo;inc.style.opacity=1;out.style.opacity=0;cv.classList.add('has');
+    const inc=coverFlip?A:B,out=coverFlip?B:A;coverFlip=!coverFlip;
+    inc.src=url;inc.style.opacity=1;out.style.opacity=0;cv.classList.add('has');
   };
-  tmp.onerror=()=>{if(curId===st.id)clear()};
-  tmp.src=st.logo;
-  logoPalette(st).then(p=>{if(curId===st.id)cv.classList.toggle('light',p.light)});
+  tmp.onerror=()=>{if(curId===st.id&&url===st.logo)clear()};
+  tmp.src=url;
 }
 /* Цвет хрома браузера: тема + цвет станции */
 function syncThemeColor(){
   const mc=$('meta[name="theme-color"]');
-  if(mc)mc.setAttribute('content',document.documentElement.getAttribute('data-theme')==='light'?PAL.pale:PAL.deep);
+  const themeLight=document.documentElement.getAttribute('data-theme')==='light',c=themeLight?PAL.pale:PAL.deep;
+  if(mc)mc.setAttribute('content',c);
+  /* системные панели прозрачные: светлый фон под ними (светлая тема или светлый плеер) → тёмные значки */
+  const lightBars=nowOpen()?nowEl.classList.contains('lt'):themeLight;
+  if(NATIVE)try{NATIVE.themeColor(c,lightBars)}catch(e){}
 }
 
 /* ==================== ДОК (мобайл): компактный режим при скролле ==================== */
@@ -1999,7 +2104,7 @@ function ensureHlsLib(){
   if(window.Hls)return Promise.resolve(true);
   return new Promise(res=>{
     const s=document.createElement('script');
-    s.src='https://cdn.jsdelivr.net/npm/hls.js@1/dist/hls.min.js';
+    s.src='https://cdn.jsdelivr.net/npm/hls.js@1.5.17/dist/hls.min.js';
     s.onload=()=>res(!!window.Hls);s.onerror=()=>res(false);
     document.head.appendChild(s);
   });
@@ -2084,6 +2189,7 @@ function renderInfo(){
   const st=state.cur;if(!st)return;
   const [a,b]=infoText(st);
   setText($('#pTitle'),a,true);setText($('#pSub'),b,true);setText($('#nowSub'),subText(st),true);
+  nativeSync();
 }
 function renderNP(np){
   const st=state.cur;if(!st)return;
@@ -2096,7 +2202,7 @@ function setMediaMeta(st,np){
     title:np&&np.title?np.title:st.name,
     artist:np&&np.title?(np.artist||st.name):(st.sub||st.genre),
     album:st.rec?'Герц · Запись':'Герц · Прямой эфир',
-    artwork:st.logo?[{src:st.logo,sizes:'196x196',type:artType(st.logo)}]:[]
+    artwork:(HD.get(st.id)||st.logo)?[{src:HD.get(st.id)||st.logo,sizes:HD.has(st.id)?'512x512':'256x256',type:artType(HD.get(st.id)||st.logo)}]:[]
   })}catch(e){}
 }
 function setMediaSession(st){
@@ -2373,7 +2479,7 @@ function handleFail(st){
   if(retries<1){retries++;toast('Переподключаемся к «'+st.name+'»…');setTimeout(()=>{if(pendingId===st.id)connect(st,true)},1800)}
   else{
     toast(st.id==='am1'&&location.protocol==='file:'
-      ?'Apple Music 1: Chrome блокирует CORS для file:// — откройте в Safari или через http-сервер'
+      &&!NATIVE?'Apple Music 1: Chrome блокирует CORS для file:// — откройте в Safari или через http-сервер'
       :'Станция «'+st.name+'» сейчас недоступна');
     state.buffering=false;state.playing=false;renderPlayState();
   }
@@ -2518,7 +2624,7 @@ function searchHomeHTML(){
   return h;
 }
 function emptyHTML(kind){
-  if(kind==='fav')return `<div class="empty"><div class="fav-ill" aria-hidden="true"><svg viewBox="0 0 120 120"><defs><linearGradient id="favg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FA233B"/><stop offset="1" stop-color="#FF375F"/></linearGradient></defs><circle class="ring" cx="60" cy="60" r="52" fill="rgba(250,35,59,.10)"/><circle class="ring" cx="60" cy="60" r="38" fill="rgba(250,35,59,.16)" style="animation-delay:.5s"/><path d="M60 92 L53.5 86.2 C34.6 69.1 22 57.8 22 43.9 C22 32.6 30.8 24 42 24 C48.4 24 54.5 27 60 33.4 C65.5 27 71.6 24 78 24 C89.2 24 98 32.6 98 43.9 C98 57.8 85.4 69.1 66.5 86.2 Z" fill="url(#favg)"/></svg></div><b>В медиатеке пока пусто</b><p>Нажмите ♥ на любой станции — она появится здесь</p><button class="btn-hero" data-view="all">Открыть радио</button></div>`;
+  if(kind==='fav')return `<div class="empty"><div class="fav-ill" aria-hidden="true"><svg viewBox="0 0 120 120"><defs><linearGradient id="favg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FA233B"/><stop offset="1" stop-color="#FF375F"/></linearGradient></defs><circle class="ring" cx="60" cy="60" r="52" fill="rgba(250,35,59,.10)"/><circle class="ring" cx="60" cy="60" r="38" fill="rgba(250,35,59,.16)" style="animation-delay:.5s"/><path d="M60 92 L53.5 86.2 C34.6 69.1 22 57.8 22 43.9 C22 32.6 30.8 24 42 24 C48.4 24 54.5 27 60 33.4 C65.5 27 71.6 24 78 24 C89.2 24 98 32.6 98 43.9 C98 57.8 85.4 69.1 66.5 86.2 Z" fill="url(#favg)"/></svg></div><b>В избранном пока пусто</b><p>Нажмите ♥ на любой станции — она появится здесь</p><button class="btn-hero" data-view="all">Открыть радио</button></div>`;
   return `<div class="empty"><svg class="ic"><use href="#i-clock"/></svg><b>Вы ещё ничего не слушали</b><p>Включите любую станцию — она появится здесь</p></div>`;
 }
 function shelfHTML(t,list,cc,all){
@@ -2594,8 +2700,8 @@ function render(){
     home.style.display='none';view.style.display='';
     let title,list,kind=state.view,extra='';
     if(ws.length){title='Результаты поиска';list=STATIONS.filter(s=>matchQ(s,ws));kind='search';extra=' · все страны'}
-    else if(state.view==='fav'){title='Медиатека';list=STATIONS.filter(s=>state.favs.has(s.id))}
-    else if(state.view==='recent'){title='Новое';list=state.recents.map(byId).filter(Boolean);extra=' · недавно прослушанные'}
+    else if(state.view==='fav'){title='Избранные';list=STATIONS.filter(s=>state.favs.has(s.id))}
+    else if(state.view==='recent'){title='Недавние';list=state.recents.map(byId).filter(Boolean)}
     else{title='Радио';list=STATIONS.filter(s=>!s.rec)}
     $('#crumbTxt').textContent=ws.length?'Поиск':title;
     if(state.view==='all'&&!ws.length){
@@ -2639,6 +2745,7 @@ function renderPlayState(){
   $('#nowPlay').classList.toggle('playing',run);
   $$('.now-row').forEach(r=>{
     const on=r.dataset.nowplay===curId;
+    if(!on&&!r.classList.contains('playing'))return; // строка не менялась — не трогаем DOM
     r.classList.toggle('playing',on);
     r.querySelector('.row-side').innerHTML=on?`<div class="eq${run?' playing':''}"><i></i><i></i><i></i><i></i></div>`:'<svg class="ic"><use href="#i-play"/></svg>';
   });
@@ -2648,7 +2755,23 @@ function renderPlayState(){
   tickProg();
   $('#pInfo').style.opacity=curId?1:.6;
   if('mediaSession' in navigator)try{navigator.mediaSession.playbackState=curId?(run?'playing':'paused'):'none'}catch(e){}
+  nativeSync();
 }
+/* Android-оболочка показывает уведомление с кнопками; здесь только отдаём ей состояние */
+function nativeSync(){
+  if(!NATIVE)return;
+  const st=state.cur,[t,s]=st?infoText(st):['',''];
+  try{NATIVE.nowPlaying(t,s,!!state.playing,!!state.buffering,st?(HD.get(st.id)||st.logo||''):'')}catch(e){}
+}
+/* Команды из уведомления и кнопка «назад» Android */
+window.HertzApp={
+  toggle:togglePlay,play(){if(!state.playing)togglePlay()},pause:()=>audio.pause(),next:()=>step(1),prev:()=>step(-1),
+  back(){
+    if(!$('#sheet').hidden){closeSheet();return true}
+    if(nowOpen()){closeNow();return true}
+    return false;
+  }
+};
 function renderSidebarRecents(){
   $('#recentList').innerHTML=state.recents.slice(0,5).map(id=>{
     const st=byId(id);
@@ -2685,8 +2808,12 @@ function nowRowHTML(s){
   </div>`;
 }
 function renderNowList(st){
-  const list=STATIONS.filter(s=>s.cc===st.cc),cc=byCc(st.cc);
-  $('#nowList').innerHTML=list.map(nowRowHTML).join('');
+  const list=STATIONS.filter(s=>s.cc===st.cc),cc=byCc(st.cc),box=$('#nowList');
+  /* список перестраиваем только при смене страны: на соседней станции достаточно подсветки (renderPlayState) —
+     полная перерисовка 60 строк с картинками давала вспышки при каждом переключении */
+  if(box.dataset.cc!==st.cc){box.dataset.cc=st.cc;box.innerHTML=list.map(nowRowHTML).join('')}
+  const cur=box.querySelector('.now-row.playing');
+  if(cur){const t=cur.offsetTop,h=cur.offsetHeight;if(t<box.scrollTop||t+h>box.scrollTop+box.clientHeight)box.scrollTop=Math.max(0,t-box.clientHeight/2+h/2)}
   /* пилюля «Ещё N станций» (портрет): счётчик, флаг, подпись страны */
   const others=list.length-1;
   $('#nowMore').classList.toggle('none',others<1);
@@ -2741,6 +2868,7 @@ function syncMood(){
 let listenMs=0,listenAt=0;
 const fmtT=s=>{s=Math.max(0,Math.floor(s));const h=Math.floor(s/3600),m=Math.floor(s%3600/60),c=String(s%60).padStart(2,'0');return h?h+':'+String(m).padStart(2,'0')+':'+c:m+':'+c};
 function tickProg(){
+  if(document.hidden)return;
   const st=state.cur,now=Date.now(),bar=$('#pBar');
   if(state.playing&&listenAt)listenMs+=now-listenAt;
   listenAt=now;
@@ -2794,7 +2922,7 @@ function openNow(){
   if(!st){toast('Сначала выберите станцию');return}
   if(!nowOpen()){ // уже открыт (двойной тап/свайп+клик) — не перерисовываем
     renderNow(st);
-    nowEl.classList.add('open');nowEl.setAttribute('aria-hidden','false');
+    nowEl.classList.add('open');nowEl.setAttribute('aria-hidden','false');syncThemeColor();
     $('#nowClose').focus({preventScroll:true});
   }
   npSyncHistory();
@@ -2940,7 +3068,11 @@ document.addEventListener('keydown',e=>{
   else if(nowOpen()&&(e.key==='ArrowUp'||e.key==='ArrowDown')){e.preventDefault();setVol(audio.volume+(e.key==='ArrowUp'?.05:-.05))}
 });
 searchInput.addEventListener('search',()=>saveQuery(searchInput.value));
-searchInput.addEventListener('input',e=>{state.q=e.target.value;render();$('#main').scrollTo({top:0})});
+let searchT=0;
+searchInput.addEventListener('input',e=>{
+  state.q=e.target.value;
+  clearTimeout(searchT);searchT=setTimeout(()=>{render();$('#main').scrollTo({top:0})},120); // не перерисовываем на каждую букву
+});
 
 /* ==================== ТЕМА ==================== */
 function applyTheme(t){
@@ -3011,6 +3143,19 @@ if(lastSt){
     e.stopPropagation();e.preventDefault();buzz(HAP.tap);dock(false);
   },true);
   syncDock();
+})();
+
+/* ===== Splash: стрелка шкалы «настраивается» на 100.0 FM; тап — пропустить ===== */
+(function(){
+  const sp=$('#splash'),f=$('#spFreq');if(!sp)return;
+  const t0=performance.now(),from=87.5,to=100.0,dur=2300;
+  (function tick(now){
+    const k=Math.min(1,(now-t0)/dur),e=1-Math.pow(1-k,3);
+    f.textContent=(from+(to-from)*e).toFixed(1);
+    if(k<1&&sp.isConnected)requestAnimationFrame(tick);
+  })(t0);
+  sp.addEventListener('animationend',e=>{if(e.animationName==='splashOut')sp.remove()});
+  sp.addEventListener('click',()=>sp.classList.add('out'));
 })();
 </script>
 </body>
